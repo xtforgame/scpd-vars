@@ -1,0 +1,22 @@
+{
+  "name": "scpd-vars",
+  "version": "0.1.0",
+  "description": "A simple variable scope management system",
+  "main": "dist/index.js",
+  "scripts": {
+    "dist": "gulp library:lint && gulp library:build",
+    "test": "gulp test:lint && gulp test:build && mocha --ui=tdd test"
+  },
+  "repository": {
+    "type": "git"
+  },
+  "keywords": [
+    "variable scope"
+  ],
+  "author": "Rick Chen <xtforgame@gmail.com> (https://github.com/xtforgame)",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "az-gulp-env": "git://github.com/xtforgame/az-gulp-env#v0.1.0"
+  }
+}
