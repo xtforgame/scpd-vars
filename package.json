@@ -17,6 +17,6 @@
   "license": "MIT",
   "dependencies": {},
   "devDependencies": {
-    "az-gulp-env": "git://github.com/xtforgame/az-gulp-env#v0.1.0"
+    "az-gulp-env": "git://github.com/xtforgame/az-gulp-env#v0.1.3"
   }
 }
