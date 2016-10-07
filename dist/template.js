@@ -11,6 +11,8 @@ var _utils = require('./utils');
 
 var _nonGenerics = require('./non-generics');
 
+var _scopeChain = require('./scope-chain');
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var defaultExprTypesDefine = {
@@ -307,6 +309,54 @@ function createExpressionClass(config) {
   return newExpressionClass;
 }
 
+function createScopeLayerClass(SvExpression, SvScope) {
+  var _class3, _temp3;
+
+  var newScopeLayerClass = (_temp3 = _class3 = function () {
+    function SvScopeLayer(scopChain, options) {
+      _classCallCheck(this, SvScopeLayer);
+
+      this._scopChain = scopChain;
+      this._options = options;
+      this._mainScope = null;
+      this._startNodeInChain = this._scopChain.pushBack(new _scopeChain.SvScopeChain.Placeholder());
+    }
+
+    _createClass(SvScopeLayer, [{
+      key: 'initScope',
+      value: function initScope(varData, options) {
+        options = Object.assign({}, options || {}, {
+          findVar: this._scopChain.findVar
+        });
+        this._mainScope = new SvScope(varData, options);
+        this._mainNodeInChain = this._scopChain.insert(this._mainScope, this._startNodeInChain);
+      }
+    }, {
+      key: 'evalVars',
+      value: function evalVars() {
+        if (!this._mainScope) {
+          return false;
+        }
+
+        this._mainScope.evalVars();
+      }
+    }, {
+      key: 'evalVar',
+      value: function evalVar(varName) {
+        return this._mainScope.evalVar(varName, new Set());
+      }
+    }, {
+      key: 'eval',
+      value: function _eval(exprRawData) {
+        return SvExpression.parseAndEval(this._mainScope, '@one-off', exprRawData, new Set());
+      }
+    }]);
+
+    return SvScopeLayer;
+  }(), _class3.ExpressionClass = SvExpression, _class3.ScopeClass = SvScope, _temp3);
+  return newScopeLayerClass;
+}
+
 var SvTemplate = exports.SvTemplate = function () {
   function SvTemplate(config) {
     _classCallCheck(this, SvTemplate);
@@ -314,9 +364,15 @@ var SvTemplate = exports.SvTemplate = function () {
     this._config = config;
     this._ExpressionClass = createExpressionClass(this._config);
     this._ScopeClass = createScopeClass(this._ExpressionClass);
+    this._ScopeLayerClass = createScopeLayerClass(this._ExpressionClass, this._ScopeClass);
   }
 
   _createClass(SvTemplate, [{
+    key: 'getScopeLayerClass',
+    value: function getScopeLayerClass() {
+      return this._ScopeLayerClass;
+    }
+  }, {
     key: 'getScopeClass',
     value: function getScopeClass() {
       return this._ScopeClass;

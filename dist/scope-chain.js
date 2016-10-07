@@ -25,6 +25,7 @@ var SvScopeChain = exports.SvScopeChain = (_temp = _class = function () {
 
     this._map = new Map();
     this._chain = new _linkedList.LinkedList();
+    this.findVar = this._findVar.bind(this);
   }
 
   _createClass(SvScopeChain, [{
@@ -86,8 +87,8 @@ var SvScopeChain = exports.SvScopeChain = (_temp = _class = function () {
       return this._chain.clear(tarNode);
     }
   }, {
-    key: 'findVar',
-    value: function findVar(visitorScope, varName) {
+    key: '_findVar',
+    value: function _findVar(visitorScope, varName) {
       var result = (0, _utils.createEmplyFindVarResult)();
       var node = this._chain.tail;
 

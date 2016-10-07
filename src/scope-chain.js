@@ -15,6 +15,7 @@ export class SvScopeChain {
   constructor(){
     this._map = new Map();
     this._chain = new LinkedList();
+    this.findVar = this._findVar.bind(this);
   }
 
   get length(){
@@ -72,7 +73,7 @@ export class SvScopeChain {
     return this._chain.clear(tarNode);
   }
 
-  findVar(visitorScope, varName){
+  _findVar(visitorScope, varName){
     let result = createEmplyFindVarResult();
     let node = this._chain.tail;
 

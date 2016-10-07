@@ -11,6 +11,10 @@ import {
   SvExprInfo,
 } from './non-generics';
 
+import {
+  SvScopeChain,
+} from './scope-chain';
+
 const defaultExprTypesDefine = {
   '@eexpr': {},
   '@nexpr': {
@@ -285,11 +289,56 @@ function createExpressionClass(config){
   return newExpressionClass;
 }
 
+function createScopeLayerClass(SvExpression, SvScope){
+  let newScopeLayerClass = class SvScopeLayer {
+    static ExpressionClass = SvExpression;
+    static ScopeClass = SvScope;
+
+    constructor(scopChain, options){
+      this._scopChain = scopChain;
+      this._options = options;
+      this._mainScope = null;
+      this._startNodeInChain = this._scopChain.pushBack(new SvScopeChain.Placeholder());
+    }
+
+    initScope(varData, options){
+      options = Object.assign({}, options || {}, {
+        findVar: this._scopChain.findVar,
+      });
+      this._mainScope = new SvScope(varData, options);
+      this._mainNodeInChain = this._scopChain.insert(this._mainScope, this._startNodeInChain);
+      // [TODO] keep implementing
+    }
+
+    evalVars(){
+      if(!this._mainScope){
+        return false;
+      }
+
+      this._mainScope.evalVars();
+    }
+
+    evalVar(varName){
+      return this._mainScope.evalVar(varName, new Set());
+    }
+
+    eval(exprRawData){
+      return SvExpression.parseAndEval(this._mainScope, '@one-off', exprRawData, new Set());
+    }
+  };
+  return newScopeLayerClass;
+}
+
 export class SvTemplate {
   constructor(config){
     this._config = config;
     this._ExpressionClass = createExpressionClass(this._config);
     this._ScopeClass = createScopeClass(this._ExpressionClass);
+    this._ScopeLayerClass = createScopeLayerClass(this._ExpressionClass, this._ScopeClass);
+  }
+
+  getScopeLayerClass(){
+    return this._ScopeLayerClass;
   }
 
   getScopeClass(){

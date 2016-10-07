@@ -20,6 +20,10 @@ import {
   TestDataScopePartB02,
 } from './test-data/test-data-scope';
 
+import {
+  SvScopeChain,
+} from '../dist/scope-chain';
+
 var expect = chai.expect;
 var assert = chai.assert;
 
@@ -239,6 +243,199 @@ describe('Template test', () => {
             });
           let varValue = scope.evalVar('var1', new Set());
           expect(varValue, 'varValue is ' + varValue).to.equal('123456789');
+          done();
+        });
+      });
+    });
+  });
+
+  describe('SvScopeLayer', () => {
+    it('Should be able to be created from SvTemplate', done => {
+      let _template = new SvTemplate(defaultExprTypesDefine);
+      let SvScopeLayer = _template.getScopeLayerClass();
+      expect(SvScopeLayer, 'SvScopeLayer is ' + SvScopeLayer).not.to.equal(undefined);
+      done();
+    });
+
+    it('Should be able to create instances', done => {
+      let _template = new SvTemplate(defaultExprTypesDefine);
+      let SvScopeLayer = _template.getScopeLayerClass();
+      let scopeChain = new SvScopeChain();
+      let scopeLayer = new SvScopeLayer(scopeChain, {});
+      expect(scopeLayer, 'scopeLayer is ' + scopeLayer).not.to.equal(undefined);
+      done();
+    });
+
+    describe('eval tests', () => {
+      let _template = new SvTemplate(defaultExprTypesDefine);
+      let SvScopeLayer = _template.getScopeLayerClass();
+
+      describe('test 1', () => {
+        it('Should be able to create instances', done => {
+          let scopeChain = new SvScopeChain();
+          let scopeLayer = new SvScopeLayer(scopeChain, {});
+          expect(scopeLayer, 'scopeLayer is ' + scopeLayer).not.to.equal(undefined);
+          expect(scopeLayer, 'scopeLayer is ' + scopeLayer).to.be.an.instanceof(SvScopeLayer);
+          done();
+        });
+
+        it('Should be able to eval vars', done => {
+          let scopeChain = new SvScopeChain();
+          let scopeLayer = new SvScopeLayer(scopeChain, {});
+          scopeLayer.initScope(TestDataScopeNormal01);
+          scopeLayer.evalVars();
+          let varValue = scopeLayer.evalVar('var1');
+          expect(varValue, 'varValue is ' + varValue).to.equal('123456789');
+
+          scopeChain = new SvScopeChain();
+          scopeLayer = new SvScopeLayer(scopeChain, {});
+          scopeLayer.initScope(TestDataScopeNormal02);
+          scopeLayer.evalVars();
+          varValue = scopeLayer.evalVar('var1');
+          expect(varValue, 'varValue is ' + varValue).to.equal('123456789');
+          done();
+        });
+
+        it('Should be able to eval expr', done => {
+          let scopeChain = new SvScopeChain();
+          let scopeLayer = new SvScopeLayer(scopeChain, {});
+          scopeLayer.initScope(TestDataScopeNormal01);
+          scopeLayer.evalVars();
+          let exprValue = scopeLayer.eval('@eexpr:aa${var1}bb');
+          expect(exprValue, 'exprValue is ' + exprValue).to.equal('aa123456789bb');
+
+          scopeChain = new SvScopeChain();
+          scopeLayer = new SvScopeLayer(scopeChain, {});
+          scopeLayer.initScope(TestDataScopeNormal02);
+          scopeLayer.evalVars();
+          exprValue = scopeLayer.eval('@eexpr:aa${var1}bb');
+          expect(exprValue, 'exprValue is ' + exprValue).to.equal('aa123456789bb');
+          done();
+        });
+
+        it('Should be able to throw an error while evaling circular dependency vars', done => {
+          let scopeChain = new SvScopeChain();
+          let scopeLayer = new SvScopeLayer(scopeChain, {});
+          scopeLayer.initScope(TestDataScopeRecu01);
+          let errorThrown = false;
+          try{
+            scopeLayer.evalVars();
+          }catch(e){
+            if(e.message.indexOf('Circular dependencies occured') !== -1){
+              errorThrown = true;
+            }
+          }
+          expect(errorThrown).to.equal(true);
+
+          scopeChain = new SvScopeChain();
+          scopeLayer = new SvScopeLayer(scopeChain, {});
+          scopeLayer.initScope(TestDataScopeRecu02);
+          errorThrown = false;
+          try{
+            scopeLayer.evalVars();
+          }catch(e){
+            if(e.message.indexOf('Circular dependencies occured') !== -1){
+              errorThrown = true;
+            }
+          }
+          expect(errorThrown).to.equal(true);
+          done();
+        });
+
+        it('Should be able to eval vars by using an external search function', done => {
+          let simpleStack = [];
+          let simpleFind = (visitorScope, varName) => {
+            for(var i = simpleStack.length - 1; i >= 0; i--) {
+              let result = simpleStack[i].findVarLocal(visitorScope, varName);
+              if(result.var){
+                return result;
+              }
+            }
+            return createEmplyFindVarResult();
+          };
+
+          let scopeChain = new SvScopeChain();
+          let scopeLayerA = new SvScopeLayer(scopeChain, {});
+          scopeLayerA.initScope(TestDataScopePartA01);
+          scopeLayerA.evalVars();
+
+          let scopeLayerB = new SvScopeLayer(scopeChain, {});
+          scopeLayerB.initScope(TestDataScopePartB01);
+          scopeLayerB.evalVars();
+
+          let var1ValueInB_01 = scopeLayerB.evalVar('var1');
+          expect(var1ValueInB_01, 'var1ValueInB_01 is ' + var1ValueInB_01).to.equal('B1B2B3B4B5B6B7A8A9');
+
+          let var1ValueInB_02 = scopeLayerB.eval('@eexpr:aa${var1}bb');
+          expect(var1ValueInB_02, 'var1ValueInB_02 is ' + var1ValueInB_02).to.equal('aaB1B2B3B4B5B6B7A8A9bb');
+
+          let var7ValueInA_01 = scopeLayerA.evalVar('var7');
+          expect(var7ValueInA_01, 'var7ValueInA_01 is ' + var7ValueInA_01).to.equal('A7A8A9');
+
+          let var7ValueInA_02 = scopeLayerA.eval('@eexpr:aa${var7}bb');
+          expect(var7ValueInA_02, 'var7ValueInA_02 is ' + var7ValueInA_02).to.equal('aaA7A8A9bb');
+
+          let var7ValueInB_01 = scopeLayerB.evalVar('var7');
+          expect(var7ValueInB_01, 'var7ValueInB_01 is ' + var7ValueInB_01).to.equal('B7A8A9');
+
+          let var7ValueInB_02 = scopeLayerB.eval('@eexpr:aa${var7}bb');
+          expect(var7ValueInB_02, 'var7ValueInB_02 is ' + var7ValueInB_02).to.equal('aaB7A8A9bb');
+          done();
+        });
+
+        it('Should be able to eval \'@dexpr\' expressions (cases)', done => {
+          let simpleStack = [];
+          let simpleFind = (visitorScope, varName) => {
+            for(var i = simpleStack.length - 1; i >= 0; i--) {
+              let result = simpleStack[i].findVarLocal(visitorScope, varName);
+              if(result.var){
+                return result;
+              }
+            }
+            return createEmplyFindVarResult();
+          };
+
+          let scopeChain = new SvScopeChain();
+          let scopeLayerA = new SvScopeLayer(scopeChain, {});
+          scopeLayerA.initScope(TestDataScopePartA02);
+          scopeLayerA.evalVars();
+
+          let scopeLayerB = new SvScopeLayer(scopeChain, {});
+          scopeLayerB.initScope(TestDataScopePartB02);
+          scopeLayerB.evalVars();
+
+          let var1ValueInB_01 = scopeLayerB.evalVar('var1');
+          expect(var1ValueInB_01, 'var1ValueInB_01 is ' + var1ValueInB_01).to.equal('B1B2B3B4B5B6B7A8A9(cases)');
+
+          let var1ValueInB_02 = scopeLayerB.eval('@eexpr:aa${var1}bb');
+          expect(var1ValueInB_02, 'var1ValueInB_02 is ' + var1ValueInB_02).to.equal('aaB1B2B3B4B5B6B7A8A9(cases)bb');
+
+          let var5_2ValueInB_01 = scopeLayerB.evalVar('var5-2');
+          expect(var5_2ValueInB_01, 'var5_2ValueInB_01 is ' + var5_2ValueInB_01).to.equal('B5B6B7A8A9(default)');
+
+          let var5_2ValueInB_02 = scopeLayerB.eval('@eexpr:aa${var5-2}bb');
+          expect(var5_2ValueInB_02, 'var5_2ValueInB_02 is ' + var5_2ValueInB_02).to.equal('aaB5B6B7A8A9(default)bb');
+
+          let var5_3ValueInB_01 = scopeLayerB.evalVar('var5-3');
+          expect(var5_3ValueInB_01, 'var5_3ValueInB_01 is ' + var5_3ValueInB_01).to.equal('B5B6B7A8A9(default)');
+
+          let var5_3ValueInB_02 = scopeLayerB.eval('@eexpr:aa${var5-3}bb');
+          expect(var5_3ValueInB_02, 'var5_3ValueInB_02 is ' + var5_3ValueInB_02).to.equal('aaB5B6B7A8A9(default)bb');
+          done();
+        });
+
+        it('Should be able to eval vars while initing', done => {
+          let scopeChain = new SvScopeChain();
+          let scopeLayer = new SvScopeLayer(scopeChain, {});
+          scopeLayer.initScope(TestDataScopeNormal01,
+            {
+              autoEval: true,
+            });
+          let varValue_01 = scopeLayer.evalVar('var1');
+          expect(varValue_01, 'varValue_01 is ' + varValue_01).to.equal('123456789');
+
+          let varValue_02 = scopeLayer.eval('@eexpr:aa${var1}bb');
+          expect(varValue_02, 'varValue_02 is ' + varValue_02).to.equal('aa123456789bb');
           done();
         });
       });

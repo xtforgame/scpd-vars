@@ -30,13 +30,13 @@ describe('Scope Chain test', function () {
       scopChain.pushBack();
 
       var scopeA = new SvScope(_testDataScope.TestDataScopePartA01, {
-        findVar: scopChain.findVar.bind(scopChain)
+        findVar: scopChain.findVar
       });
       scopChain.pushBack(scopeA);
       scopeA.evalVars();
 
       var scopeB = new SvScope(_testDataScope.TestDataScopePartB01, {
-        findVar: scopChain.findVar.bind(scopChain)
+        findVar: scopChain.findVar
       });
       scopChain.pushBack(scopeB);
       scopeB.evalVars();

@@ -38,14 +38,14 @@ describe('Scope Chain test', () => {
 
       let scopeA = new SvScope(TestDataScopePartA01,
         {
-          findVar: scopChain.findVar.bind(scopChain),
+          findVar: scopChain.findVar,
         });
       scopChain.pushBack(scopeA);
       scopeA.evalVars();
 
       let scopeB = new SvScope(TestDataScopePartB01,
         {
-          findVar: scopChain.findVar.bind(scopChain),
+          findVar: scopChain.findVar,
         });
       scopChain.pushBack(scopeB);
       scopeB.evalVars();
