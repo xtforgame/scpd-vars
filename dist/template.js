@@ -96,8 +96,23 @@ function createScopeClass(SvExpression) {
           evalingSet.delete(varName);
           throw new Error('Eval failed, var name not found :' + varName);
         }
-        var result = findResult.var.eval(evalingSet);
+
+        var newEvalingSet = findResult.var._scope === this ? evalingSet : new Set();
+        var result = findResult.var.eval(newEvalingSet);
         evalingSet.delete(varName);
+        return result;
+      }
+    }, {
+      key: 'evalVarExternal',
+      value: function evalVarExternal(varName, evalingSet) {
+        var findResult = this.findVarExternal(varName);
+        if (!findResult.var) {
+          evalingSet.delete(varName);
+          throw new Error('Eval failed, var name not found :' + varName);
+        }
+
+        var newEvalingSet = findResult.var._scope === this ? evalingSet : new Set();
+        var result = findResult.var.eval(newEvalingSet);
         return result;
       }
     }, {

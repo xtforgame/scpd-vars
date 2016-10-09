@@ -13,12 +13,21 @@ var SvVariable = exports.SvVariable = function () {
     _classCallCheck(this, SvVariable);
 
     this._scope = scope;
-    this._name = name;
+    var parentPrefixString = '$parent.';
+    if (name.length > parentPrefixString.length && name.substr(0, parentPrefixString.length) === parentPrefixString) {
+      this._type = 'parent';
+      this._name = name.substr(parentPrefixString.length);
+    } else {
+      this._name = name;
+    }
   }
 
   _createClass(SvVariable, [{
     key: 'eval',
     value: function _eval(evalingSet) {
+      if (this._type === 'parent') {
+        return this._scope.evalVarExternal(this._name, evalingSet);
+      }
       return this._scope.evalVar(this._name, evalingSet);
     }
   }, {
