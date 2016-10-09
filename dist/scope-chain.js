@@ -119,6 +119,16 @@ var SvScopeChain = exports.SvScopeChain = (_temp = _class = function () {
     get: function get() {
       return this._chain.length;
     }
+  }, {
+    key: 'head',
+    get: function get() {
+      return this._chain.head;
+    }
+  }, {
+    key: 'tail',
+    get: function get() {
+      return this._chain.tail;
+    }
   }]);
 
   return SvScopeChain;

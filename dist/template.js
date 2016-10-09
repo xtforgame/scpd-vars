@@ -314,22 +314,108 @@ function createScopeLayerClass(SvExpression, SvScope) {
 
   var newScopeLayerClass = (_temp3 = _class3 = function () {
     function SvScopeLayer(scopChain, options) {
+      var _this = this;
+
       _classCallCheck(this, SvScopeLayer);
 
       this._scopChain = scopChain;
       this._options = options;
+
+      this._nodeDefines = {
+        placeHolder: {
+          insert: function insert() {
+            return null;
+          }
+        },
+        main: {
+          insert: function insert() {
+            return _this.node('placeHolder');
+          },
+          onCreated: function onCreated(node, scope) {
+            _this._mainScope = scope;
+            _this._lastNode = node;
+          }
+        },
+        before: {
+          insert: function insert() {
+            return _this.node('main');
+          }
+        },
+        after: {
+          insert: function insert() {
+            return _this.node('main').next;
+          },
+          onCreated: function onCreated(node) {
+            return _this._lastNode = node;
+          },
+          onRemoved: function onRemoved() {
+            return _this._lastNode = _this.node('main');
+          }
+        },
+        head: {
+          insert: function insert() {
+            return _this._scopChain.head;
+          }
+        }
+      };
       this._mainScope = null;
-      this._startNodeInChain = this._scopChain.pushBack(new _scopeChain.SvScopeChain.Placeholder());
+      this._firstNode = this._scopChain.pushBack(new _scopeChain.SvScopeChain.Placeholder());
+      this._lastNode = this._firstNode;
     }
 
     _createClass(SvScopeLayer, [{
-      key: 'initScope',
-      value: function initScope(varData, options) {
+      key: 'node',
+      value: function node(nodeName) {
+        return this._nodeDefines[nodeName].node;
+      }
+    }, {
+      key: 'scope',
+      value: function scope(nodeName) {
+        return this._nodeDefines[nodeName].scope;
+      }
+    }, {
+      key: '_createNode',
+      value: function _createNode(name, varData, options) {
+        this._removeNode(name);
+
         options = Object.assign({}, options || {}, {
           findVar: this._scopChain.findVar
         });
-        this._mainScope = new SvScope(varData, options);
-        this._mainNodeInChain = this._scopChain.insert(this._mainScope, this._startNodeInChain);
+        var scope = new SvScope(varData, options);
+
+        var insertPosFunc = this._nodeDefines[name].insert || function () {
+          return null;
+        };
+        var onCreated = this._nodeDefines[name].onCreated || function () {
+          return null;
+        };
+        this._nodeDefines[name].scope = scope;
+        var node = this._nodeDefines[name].node = this._scopChain.insert(scope, insertPosFunc());
+        onCreated(node, scope, name);
+        return node;
+      }
+    }, {
+      key: '_removeNode',
+      value: function _removeNode(name) {
+        if (!this._nodeDefines[name].scope) {
+          return false;
+        }
+        var _nodeDefines$name = this._nodeDefines[name];
+        var scope = _nodeDefines$name.scope;
+        var node = _nodeDefines$name.node;
+
+        var onRemoved = this._nodeDefines[name].onRemoved || function () {
+          return null;
+        };
+        this._scopChain.delete(this._nodeDefines[name].scope);
+        this._nodeDefines[name].scope = null;
+        this._nodeDefines[name].node = null;
+        onRemoved(node, scope, name);
+      }
+    }, {
+      key: 'initScope',
+      value: function initScope(varData, options) {
+        return this._createNode('main', varData, options);
       }
     }, {
       key: 'evalVars',
@@ -343,17 +429,78 @@ function createScopeLayerClass(SvExpression, SvScope) {
     }, {
       key: 'evalVar',
       value: function evalVar(varName) {
-        return this._mainScope.evalVar(varName, new Set());
+        return this._lastNode.data.evalVar(varName, new Set());
       }
     }, {
       key: 'eval',
       value: function _eval(exprRawData) {
-        return SvExpression.parseAndEval(this._mainScope, '@one-off', exprRawData, new Set());
+        return SvExpression.parseAndEval(this._lastNode.data, '@one-off', exprRawData, new Set());
+      }
+    }, {
+      key: '_setupNodesBeforeQuery',
+      value: function _setupNodesBeforeQuery(varDataMap) {
+        var _this2 = this;
+
+        varDataMap = varDataMap || {};
+        newScopeLayerClass.TempNodeNameForQuery.map(function (name) {
+          if (name in varDataMap) {
+            var node = _this2._createNode(name, varDataMap[name]);
+            node.data.evalVars();
+          }
+        });
+      }
+    }, {
+      key: '_cleanNodesAfterQuery',
+      value: function _cleanNodesAfterQuery() {
+        var _this3 = this;
+
+        newScopeLayerClass.TempNodeNameForQuery.map(function (name) {
+          _this3._removeNode(name);
+        });
+      }
+    }, {
+      key: 'query',
+      value: function query(exprRawData, varDataMap) {
+        this._setupNodesBeforeQuery(varDataMap);
+        var result = null;
+        try {
+          result = this.eval(exprRawData);
+        } catch (e) {
+          this._cleanNodesAfterQuery();
+          throw e;
+        }
+        this._cleanNodesAfterQuery();
+        return result;
+      }
+    }, {
+      key: 'compile',
+      value: function compile(srcVarData, varDataMap) {
+        var _this4 = this;
+
+        this._setupNodesBeforeQuery(varDataMap);
+        var result = null;
+        try {
+          if (Array.isArray(srcVarData)) {
+            result = srcVarData.map(function (exprRawData) {
+              return _this4.eval(exprRawData);
+            });
+          } else {
+            result = {};
+            for (var varName in srcVarData) {
+              result[varName] = this.eval(srcVarData[varName]);
+            }
+          }
+        } catch (e) {
+          this._cleanNodesAfterQuery();
+          throw e;
+        }
+        this._cleanNodesAfterQuery();
+        return result;
       }
     }]);
 
     return SvScopeLayer;
-  }(), _class3.ExpressionClass = SvExpression, _class3.ScopeClass = SvScope, _temp3);
+  }(), _class3.ExpressionClass = SvExpression, _class3.ScopeClass = SvScope, _class3.TempNodeNameForQuery = ['head', 'before', 'after'], _temp3);
   return newScopeLayerClass;
 }
 

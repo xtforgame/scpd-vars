@@ -22,6 +22,14 @@ export class SvScopeChain {
     return this._chain.length;
   }
 
+  get head(){
+    return this._chain.head;
+  }
+
+  get tail(){
+    return this._chain.tail;
+  }
+
   pushFront(data){
     this.delete(data);
     let node = this._chain.pushFront(data);

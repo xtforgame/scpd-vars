@@ -426,5 +426,158 @@ describe('Template test', function () {
         });
       });
     });
+
+    describe('query tests', function () {
+      var _template = new _dist.SvTemplate(_dist.defaultExprTypesDefine);
+      var SvScopeLayer = _template.getScopeLayerClass();
+
+      describe('test 1', function () {
+        it('Should be able to eval vars with temp varData(before)', function (done) {
+          var scopeChain = new _scopeChain.SvScopeChain();
+          var scopeLayer = new SvScopeLayer(scopeChain, {});
+          scopeLayer.initScope(_testDataScope.TestDataScopeNormal01);
+          scopeLayer.evalVars();
+          var varValue = scopeLayer.query('@eexpr:${var1}', {
+            before: { var1: 'xx' }
+          });
+          expect(varValue, 'varValue is ' + varValue).to.equal('123456789');
+
+          scopeChain = new _scopeChain.SvScopeChain();
+          scopeLayer = new SvScopeLayer(scopeChain, {});
+          scopeLayer.initScope(_testDataScope.TestDataScopeNormal02);
+          scopeLayer.evalVars();
+          varValue = scopeLayer.query('@eexpr:${var99}', {
+            before: { var99: 'xx' }
+          });
+          expect(varValue, 'varValue is ' + varValue).to.equal('xx');
+          done();
+        });
+
+        it('Should be able to eval vars with temp varData(after)', function (done) {
+          var scopeChain = new _scopeChain.SvScopeChain();
+          var scopeLayer = new SvScopeLayer(scopeChain, {});
+          scopeLayer.initScope(_testDataScope.TestDataScopeNormal01);
+          scopeLayer.evalVars();
+          var varValue = scopeLayer.query('@eexpr:${var1}', {
+            after: { var1: 'xx' }
+          });
+          expect(varValue, 'varValue is ' + varValue).to.equal('xx');
+
+          scopeChain = new _scopeChain.SvScopeChain();
+          scopeLayer = new SvScopeLayer(scopeChain, {});
+          scopeLayer.initScope(_testDataScope.TestDataScopeNormal02);
+          scopeLayer.evalVars();
+          varValue = scopeLayer.query('@eexpr:${var1}', {
+            after: { var1: 'xx' }
+          });
+          expect(varValue, 'varValue is ' + varValue).to.equal('xx');
+          done();
+        });
+
+        it('Should be able to eval vars with temp varData(head)', function (done) {
+          var simpleStack = [];
+          var simpleFind = function simpleFind(visitorScope, varName) {
+            for (var i = simpleStack.length - 1; i >= 0; i--) {
+              var result = simpleStack[i].findVarLocal(visitorScope, varName);
+              if (result.var) {
+                return result;
+              }
+            }
+            return (0, _dist.createEmplyFindVarResult)();
+          };
+
+          var scopeChain = new _scopeChain.SvScopeChain();
+          var scopeLayerA = new SvScopeLayer(scopeChain, {});
+          scopeLayerA.initScope(_testDataScope.TestDataScopePartA01);
+          scopeLayerA.evalVars();
+
+          var scopeLayerB = new SvScopeLayer(scopeChain, {});
+          scopeLayerB.initScope(_testDataScope.TestDataScopePartB01);
+          scopeLayerB.evalVars();
+
+          var var9ValueInB_02 = scopeLayerB.query('@eexpr:aa${var9}bb', {
+            head: { var9: 'xx' }
+          });
+          expect(var9ValueInB_02, 'var9ValueInB_02 is ' + var9ValueInB_02).to.equal('aaA9bb');
+
+          var var99ValueInB_02 = scopeLayerB.query('@eexpr:aa${var99}bb', {
+            head: { var99: 'xx' }
+          });
+          expect(var99ValueInB_02, 'var99ValueInB_02 is ' + var99ValueInB_02).to.equal('aaxxbb');
+          done();
+        });
+
+        it('Should be able to throw an error while evaling circular dependency vars', function (done) {
+          var scopeChain = new _scopeChain.SvScopeChain();
+          var scopeLayer = new SvScopeLayer(scopeChain, {});
+          scopeLayer.initScope(_testDataScope.TestDataScopeNormal01);
+          scopeLayer.evalVars();
+
+          var errorThrown = false;
+          try {
+            scopeLayer.query('@eexpr:${var1}', {
+              after: { var1: '@eexpr:${var1}' }
+            });
+          } catch (e) {
+            if (e.message.indexOf('Circular dependencies occured') !== -1) {
+              errorThrown = true;
+            }
+          }
+          expect(errorThrown).to.equal(true);
+          done();
+        });
+
+        it('Should be able to eval vars with temp varData(head)', function (done) {
+          var simpleStack = [];
+          var simpleFind = function simpleFind(visitorScope, varName) {
+            for (var i = simpleStack.length - 1; i >= 0; i--) {
+              var _result = simpleStack[i].findVarLocal(visitorScope, varName);
+              if (_result.var) {
+                return _result;
+              }
+            }
+            return (0, _dist.createEmplyFindVarResult)();
+          };
+
+          var scopeChain = new _scopeChain.SvScopeChain();
+          var scopeLayerA = new SvScopeLayer(scopeChain, {});
+          scopeLayerA.initScope(_testDataScope.TestDataScopePartA01);
+          scopeLayerA.evalVars();
+
+          var scopeLayerB = new SvScopeLayer(scopeChain, {});
+          scopeLayerB.initScope(_testDataScope.TestDataScopePartB01);
+          scopeLayerB.evalVars();
+
+          var result = scopeLayerB.compile({
+            aavar1bb: '@eexpr:aa${var1}bb',
+            aavar2bb: '@eexpr:aa${var2}bb',
+            aavar8bb: '@eexpr:aa${var8}bb',
+            aavar9bb: '@eexpr:aa${var9}bb',
+            aavar99bb: '@eexpr:aa${var99}bb' }, {
+            head: {
+              var1: 'var1head',
+              var2: 'var2head',
+              var8: 'var8head',
+              var9: 'var9head',
+              var99: 'var99head'
+            },
+            before: {
+              var1: 'var1before',
+              var2: 'var2before',
+              var8: 'var8before'
+            },
+            after: {
+              var1: 'var1after'
+            }
+          });
+          expect(result.aavar1bb, 'result.aavar1bb is ' + result.aavar1bb).to.equal('aavar1afterbb');
+          expect(result.aavar2bb, 'result.aavar2bb is ' + result.aavar2bb).to.equal('aaB2B3B4B5B6B7A8A9bb');
+          expect(result.aavar8bb, 'result.aavar8bb is ' + result.aavar8bb).to.equal('aavar8beforebb');
+          expect(result.aavar9bb, 'result.aavar9bb is ' + result.aavar9bb).to.equal('aaA9bb');
+          expect(result.aavar99bb, 'result.aavar99bb is ' + result.aavar99bb).to.equal('aavar99headbb');
+          done();
+        });
+      });
+    });
   });
 });

@@ -440,6 +440,160 @@ describe('Template test', () => {
         });
       });
     });
+
+    describe('query tests', () => {
+      let _template = new SvTemplate(defaultExprTypesDefine);
+      let SvScopeLayer = _template.getScopeLayerClass();
+
+      describe('test 1', () => {
+        it('Should be able to eval vars with temp varData(before)', done => {
+          let scopeChain = new SvScopeChain();
+          let scopeLayer = new SvScopeLayer(scopeChain, {});
+          scopeLayer.initScope(TestDataScopeNormal01);
+          scopeLayer.evalVars();
+          let varValue = scopeLayer.query('@eexpr:${var1}', {
+            before: {var1: 'xx'},
+          });
+          expect(varValue, 'varValue is ' + varValue).to.equal('123456789');
+
+          scopeChain = new SvScopeChain();
+          scopeLayer = new SvScopeLayer(scopeChain, {});
+          scopeLayer.initScope(TestDataScopeNormal02);
+          scopeLayer.evalVars();
+          varValue = scopeLayer.query('@eexpr:${var99}', {
+            before: {var99: 'xx'},
+          });
+          expect(varValue, 'varValue is ' + varValue).to.equal('xx');
+          done();
+        });
+
+        it('Should be able to eval vars with temp varData(after)', done => {
+          let scopeChain = new SvScopeChain();
+          let scopeLayer = new SvScopeLayer(scopeChain, {});
+          scopeLayer.initScope(TestDataScopeNormal01);
+          scopeLayer.evalVars();
+          let varValue = scopeLayer.query('@eexpr:${var1}', {
+            after: {var1: 'xx'},
+          });
+          expect(varValue, 'varValue is ' + varValue).to.equal('xx');
+
+          scopeChain = new SvScopeChain();
+          scopeLayer = new SvScopeLayer(scopeChain, {});
+          scopeLayer.initScope(TestDataScopeNormal02);
+          scopeLayer.evalVars();
+          varValue = scopeLayer.query('@eexpr:${var1}', {
+            after: {var1: 'xx'},
+          });
+          expect(varValue, 'varValue is ' + varValue).to.equal('xx');
+          done();
+        });
+
+        it('Should be able to eval vars with temp varData(head)', done => {
+          let simpleStack = [];
+          let simpleFind = (visitorScope, varName) => {
+            for(var i = simpleStack.length - 1; i >= 0; i--) {
+              let result = simpleStack[i].findVarLocal(visitorScope, varName);
+              if(result.var){
+                return result;
+              }
+            }
+            return createEmplyFindVarResult();
+          };
+
+          let scopeChain = new SvScopeChain();
+          let scopeLayerA = new SvScopeLayer(scopeChain, {});
+          scopeLayerA.initScope(TestDataScopePartA01);
+          scopeLayerA.evalVars();
+
+          let scopeLayerB = new SvScopeLayer(scopeChain, {});
+          scopeLayerB.initScope(TestDataScopePartB01);
+          scopeLayerB.evalVars();
+
+          let var9ValueInB_02 = scopeLayerB.query('@eexpr:aa${var9}bb', {
+            head: {var9: 'xx'},
+          });
+          expect(var9ValueInB_02, 'var9ValueInB_02 is ' + var9ValueInB_02).to.equal('aaA9bb');
+
+          let var99ValueInB_02 = scopeLayerB.query('@eexpr:aa${var99}bb', {
+            head: {var99: 'xx'},
+          });
+          expect(var99ValueInB_02, 'var99ValueInB_02 is ' + var99ValueInB_02).to.equal('aaxxbb');
+          done();
+        });
+
+        it('Should be able to throw an error while evaling circular dependency vars', done => {
+          let scopeChain = new SvScopeChain();
+          let scopeLayer = new SvScopeLayer(scopeChain, {});
+          scopeLayer.initScope(TestDataScopeNormal01);
+          scopeLayer.evalVars();
+
+          let errorThrown = false;
+          try{
+            scopeLayer.query('@eexpr:${var1}', {
+              after: {var1: '@eexpr:${var1}'},
+            });
+          }catch(e){
+            if(e.message.indexOf('Circular dependencies occured') !== -1){
+              errorThrown = true;
+            }
+          }
+          expect(errorThrown).to.equal(true);
+          done();
+        });
+
+        it('Should be able to eval vars with temp varData(head)', done => {
+          let simpleStack = [];
+          let simpleFind = (visitorScope, varName) => {
+            for(var i = simpleStack.length - 1; i >= 0; i--) {
+              let result = simpleStack[i].findVarLocal(visitorScope, varName);
+              if(result.var){
+                return result;
+              }
+            }
+            return createEmplyFindVarResult();
+          };
+
+          let scopeChain = new SvScopeChain();
+          let scopeLayerA = new SvScopeLayer(scopeChain, {});
+          scopeLayerA.initScope(TestDataScopePartA01);
+          scopeLayerA.evalVars();
+
+          let scopeLayerB = new SvScopeLayer(scopeChain, {});
+          scopeLayerB.initScope(TestDataScopePartB01);
+          scopeLayerB.evalVars();
+
+          let result = scopeLayerB.compile({
+            aavar1bb: '@eexpr:aa${var1}bb', // use the 'var1' of 'after'
+            aavar2bb: '@eexpr:aa${var2}bb', // use the 'var1' of 'main(LayerB)'
+            aavar8bb: '@eexpr:aa${var8}bb', // use the 'var8' of 'before'
+            aavar9bb: '@eexpr:aa${var9}bb', // use the 'var9' of 'main(LayerA)'
+            aavar99bb: '@eexpr:aa${var99}bb' // use the 'var9' of 'head'
+          }, {
+            head: {
+              var1: 'var1head',
+              var2: 'var2head',
+              var8: 'var8head',
+              var9: 'var9head',
+              var99: 'var99head',
+            },
+            before: {
+              var1: 'var1before',
+              var2: 'var2before',
+              var8: 'var8before',
+            },
+            after: {
+              var1: 'var1after',
+            },
+          });
+          expect(result.aavar1bb, 'result.aavar1bb is ' + result.aavar1bb).to.equal('aavar1afterbb');
+          expect(result.aavar2bb, 'result.aavar2bb is ' + result.aavar2bb).to.equal('aaB2B3B4B5B6B7A8A9bb');
+          expect(result.aavar8bb, 'result.aavar8bb is ' + result.aavar8bb).to.equal('aavar8beforebb');
+          expect(result.aavar9bb, 'result.aavar9bb is ' + result.aavar9bb).to.equal('aaA9bb');
+          expect(result.aavar99bb, 'result.aavar99bb is ' + result.aavar99bb).to.equal('aavar99headbb');
+          done();
+        });
+      });
+    });
   });
 });
 
