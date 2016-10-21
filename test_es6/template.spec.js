@@ -563,13 +563,14 @@ describe('Template test', () => {
           scopeLayerB.evalVars();
 
           let result = scopeLayerB.compile({
-            aavar1bb: '@eexpr:aa${var1}bb', // use the 'var1' of 'after'
-            aaparentvar1bb: '@eexpr:aa${$parent.var1}bb', // use the 'var1' of 'main(LayerB)'
+            var1: 'var1queryBody',
+            aavar1bb: '@eexpr:aa${var1}bb',  // use the 'var1' of 'queryBody'(the same scope of this entry)
+            aaparentvar1bb: '@eexpr:aa${$parent.var1}bb', // use the 'var1' of 'after'
             aavar2bb: '@eexpr:aa${var2}bb', // use the 'var2' of 'main(LayerB)'
             aavar3bb: '@eexpr:aa${var3}bb', // use the 'var3' of 'main(LayerB)'
             aavar8bb: '@eexpr:aa${var8}bb', // use the 'var8' of 'before'
             aavar9bb: '@eexpr:aa${var9}bb', // use the 'var9' of 'main(LayerA)'
-            aavar99bb: '@eexpr:aa${var99}bb' // use the 'var9' of 'head'
+            aavar99bb: '@eexpr:aa${var99}bb', // use the 'var9' of 'head'
           }, {
             head: {
               var1: 'var1head',
@@ -588,8 +589,8 @@ describe('Template test', () => {
               var3: '@eexpr:${$parent.var3}',
             },
           });
-          expect(result.aavar1bb, 'result.aavar1bb is ' + result.aavar1bb).to.equal('aavar1afterbb');
-          expect(result.aaparentvar1bb, 'result.aaparentvar1bb is ' + result.aaparentvar1bb).to.equal('aaB1B2B3B4B5B6B7A8A9bb');
+          expect(result.aavar1bb, 'result.aavar1bb is ' + result.aavar1bb).to.equal('aavar1queryBodybb');
+          expect(result.aaparentvar1bb, 'result.aaparentvar1bb is ' + result.aaparentvar1bb).to.equal('aavar1afterbb');
           expect(result.aavar2bb, 'result.aavar2bb is ' + result.aavar2bb).to.equal('aaB2B3B4B5B6B7A8A9bb');
           expect(result.aavar3bb, 'result.aavar3bb is ' + result.aavar3bb).to.equal('aaB3B4B5B6B7A8A9bb');
           expect(result.aavar8bb, 'result.aavar8bb is ' + result.aavar8bb).to.equal('aavar8beforebb');

@@ -549,6 +549,7 @@ describe('Template test', function () {
           scopeLayerB.evalVars();
 
           var result = scopeLayerB.compile({
+            var1: 'var1queryBody',
             aavar1bb: '@eexpr:aa${var1}bb',
             aaparentvar1bb: '@eexpr:aa${$parent.var1}bb',
             aavar2bb: '@eexpr:aa${var2}bb',
@@ -573,8 +574,8 @@ describe('Template test', function () {
               var3: '@eexpr:${$parent.var3}'
             }
           });
-          expect(result.aavar1bb, 'result.aavar1bb is ' + result.aavar1bb).to.equal('aavar1afterbb');
-          expect(result.aaparentvar1bb, 'result.aaparentvar1bb is ' + result.aaparentvar1bb).to.equal('aaB1B2B3B4B5B6B7A8A9bb');
+          expect(result.aavar1bb, 'result.aavar1bb is ' + result.aavar1bb).to.equal('aavar1queryBodybb');
+          expect(result.aaparentvar1bb, 'result.aaparentvar1bb is ' + result.aaparentvar1bb).to.equal('aavar1afterbb');
           expect(result.aavar2bb, 'result.aavar2bb is ' + result.aavar2bb).to.equal('aaB2B3B4B5B6B7A8A9bb');
           expect(result.aavar3bb, 'result.aavar3bb is ' + result.aavar3bb).to.equal('aaB3B4B5B6B7A8A9bb');
           expect(result.aavar8bb, 'result.aavar8bb is ' + result.aavar8bb).to.equal('aavar8beforebb');

@@ -70,15 +70,29 @@ function createScopeClass(SvExpression){
       }
     }
 
+    _evalVars(){
+      let result = {};
+      for(let key in this._varMap) {
+        result[key] = this._varMap[key].eval(new Set());
+      }
+      return result;
+    }
+
     evalVars(){
       for(let key in this._varData) {
         this._varMap[key] = SvExpression.parse(this, key, this._varData[key]);
       }
 
-      for(let key in this._varMap) {
-        this._varMap[key].eval(new Set());
-      }
+      let result = this._evalVars();
       this._evaled = true;
+      return result;
+    }
+
+    getEvaledVars(){
+      if(!this._evaled){
+        return null;
+      }
+      return this._evalVars();
     }
 
     evalVar(varName, evalingSet){
@@ -228,7 +242,7 @@ function createExpressionClass(config){
     }
 
     static parseAndEval(scope, name, rawData, evalingSet){
-      let exprObj = newExpressionClass.parse(scope, name, rawData)
+      let exprObj = newExpressionClass.parse(scope, name, rawData);
       return exprObj.eval(evalingSet);
     }
 
@@ -317,6 +331,9 @@ function createScopeLayerClass(SvExpression, SvScope){
         placeHolder: {
           insert: () => (null),
         },
+        head: {
+          insert: () => (this._scopChain.head),
+        },
         main: {
           insert: () => (this.node('placeHolder')),
           onCreated: (node, scope) => {
@@ -330,12 +347,12 @@ function createScopeLayerClass(SvExpression, SvScope){
         after: {
           insert: () => (this.node('main').next),
           onCreated: (node) => (this._lastNode = node),
-          onRemoved: () => (this._lastNode = this.node('main')),
         },
-        head: {
-          insert: () => (this._scopChain.head),
-        }
-      }
+        queryBody: {
+          insert: () => ((this.node('after') || this.node('main')).next),
+          onCreated: (node) => (this._lastNode = node),
+        },
+      };
       this._mainScope = null;
       this._firstNode = this._scopChain.pushBack(new SvScopeChain.Placeholder());
       this._lastNode = this._firstNode;
@@ -370,7 +387,7 @@ function createScopeLayerClass(SvExpression, SvScope){
         return false;
       }
       let {scope, node} = this._nodeDefines[name];
-      let onRemoved = this._nodeDefines[name].onRemoved || (() => null);
+      let onRemoved = this._nodeDefines[name].onRemoved || ((node) => this._lastNode === node ? this._lastNode = node.prev : null);
       this._scopChain.delete(this._nodeDefines[name].scope);
       this._nodeDefines[name].scope = null;
       this._nodeDefines[name].node = null;
@@ -408,16 +425,16 @@ function createScopeLayerClass(SvExpression, SvScope){
     }
 
     _cleanNodesAfterQuery(){
+      this._removeNode('queryBody');
       newScopeLayerClass.TempNodeNameForQuery.map(name => {
         this._removeNode(name);
       });
     }
 
     query(exprRawData, varDataMap){
-      this._setupNodesBeforeQuery(varDataMap);
-      let result = null;
       try{
-        result = this.eval(exprRawData);
+        this._setupNodesBeforeQuery(varDataMap);
+        return this.eval(exprRawData);
       }catch(e){
         this._cleanNodesAfterQuery();
         throw e;
@@ -427,17 +444,10 @@ function createScopeLayerClass(SvExpression, SvScope){
     }
 
     compile(srcVarData, varDataMap){
-      this._setupNodesBeforeQuery(varDataMap);
-      let result = null;
       try{
-        if(Array.isArray(srcVarData)){
-          result = srcVarData.map(exprRawData => this.eval(exprRawData));
-        }else{
-          result = {};
-          for(let varName in srcVarData){
-            result[varName] = this.eval(srcVarData[varName]);
-          }
-        }
+        this._setupNodesBeforeQuery(varDataMap);
+        let node = this._createNode('queryBody', srcVarData);
+        return node.data.evalVars();
       }catch(e){
         this._cleanNodesAfterQuery();
         throw e;

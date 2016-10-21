@@ -72,16 +72,32 @@ function createScopeClass(SvExpression) {
     }
 
     _createClass(SvScope, [{
+      key: '_evalVars',
+      value: function _evalVars() {
+        var result = {};
+        for (var key in this._varMap) {
+          result[key] = this._varMap[key].eval(new Set());
+        }
+        return result;
+      }
+    }, {
       key: 'evalVars',
       value: function evalVars() {
         for (var key in this._varData) {
           this._varMap[key] = SvExpression.parse(this, key, this._varData[key]);
         }
 
-        for (var _key in this._varMap) {
-          this._varMap[_key].eval(new Set());
-        }
+        var result = this._evalVars();
         this._evaled = true;
+        return result;
+      }
+    }, {
+      key: 'getEvaledVars',
+      value: function getEvaledVars() {
+        if (!this._evaled) {
+          return null;
+        }
+        return this._evalVars();
       }
     }, {
       key: 'evalVar',
@@ -342,6 +358,11 @@ function createScopeLayerClass(SvExpression, SvScope) {
             return null;
           }
         },
+        head: {
+          insert: function insert() {
+            return _this._scopChain.head;
+          }
+        },
         main: {
           insert: function insert() {
             return _this.node('placeHolder');
@@ -362,14 +383,14 @@ function createScopeLayerClass(SvExpression, SvScope) {
           },
           onCreated: function onCreated(node) {
             return _this._lastNode = node;
-          },
-          onRemoved: function onRemoved() {
-            return _this._lastNode = _this.node('main');
           }
         },
-        head: {
+        queryBody: {
           insert: function insert() {
-            return _this._scopChain.head;
+            return (_this.node('after') || _this.node('main')).next;
+          },
+          onCreated: function onCreated(node) {
+            return _this._lastNode = node;
           }
         }
       };
@@ -412,6 +433,8 @@ function createScopeLayerClass(SvExpression, SvScope) {
     }, {
       key: '_removeNode',
       value: function _removeNode(name) {
+        var _this2 = this;
+
         if (!this._nodeDefines[name].scope) {
           return false;
         }
@@ -419,8 +442,8 @@ function createScopeLayerClass(SvExpression, SvScope) {
         var scope = _nodeDefines$name.scope;
         var node = _nodeDefines$name.node;
 
-        var onRemoved = this._nodeDefines[name].onRemoved || function () {
-          return null;
+        var onRemoved = this._nodeDefines[name].onRemoved || function (node) {
+          return _this2._lastNode === node ? _this2._lastNode = node.prev : null;
         };
         this._scopChain.delete(this._nodeDefines[name].scope);
         this._nodeDefines[name].scope = null;
@@ -454,12 +477,12 @@ function createScopeLayerClass(SvExpression, SvScope) {
     }, {
       key: '_setupNodesBeforeQuery',
       value: function _setupNodesBeforeQuery(varDataMap) {
-        var _this2 = this;
+        var _this3 = this;
 
         varDataMap = varDataMap || {};
         newScopeLayerClass.TempNodeNameForQuery.map(function (name) {
           if (name in varDataMap) {
-            var node = _this2._createNode(name, varDataMap[name]);
+            var node = _this3._createNode(name, varDataMap[name]);
             node.data.evalVars();
           }
         });
@@ -467,19 +490,19 @@ function createScopeLayerClass(SvExpression, SvScope) {
     }, {
       key: '_cleanNodesAfterQuery',
       value: function _cleanNodesAfterQuery() {
-        var _this3 = this;
+        var _this4 = this;
 
+        this._removeNode('queryBody');
         newScopeLayerClass.TempNodeNameForQuery.map(function (name) {
-          _this3._removeNode(name);
+          _this4._removeNode(name);
         });
       }
     }, {
       key: 'query',
       value: function query(exprRawData, varDataMap) {
-        this._setupNodesBeforeQuery(varDataMap);
-        var result = null;
         try {
-          result = this.eval(exprRawData);
+          this._setupNodesBeforeQuery(varDataMap);
+          return this.eval(exprRawData);
         } catch (e) {
           this._cleanNodesAfterQuery();
           throw e;
@@ -490,21 +513,10 @@ function createScopeLayerClass(SvExpression, SvScope) {
     }, {
       key: 'compile',
       value: function compile(srcVarData, varDataMap) {
-        var _this4 = this;
-
-        this._setupNodesBeforeQuery(varDataMap);
-        var result = null;
         try {
-          if (Array.isArray(srcVarData)) {
-            result = srcVarData.map(function (exprRawData) {
-              return _this4.eval(exprRawData);
-            });
-          } else {
-            result = {};
-            for (var varName in srcVarData) {
-              result[varName] = this.eval(srcVarData[varName]);
-            }
-          }
+          this._setupNodesBeforeQuery(varDataMap);
+          var node = this._createNode('queryBody', srcVarData);
+          return node.data.evalVars();
         } catch (e) {
           this._cleanNodesAfterQuery();
           throw e;
