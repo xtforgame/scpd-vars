@@ -89,3 +89,10 @@ var TestDataScopePartB02 = exports.TestDataScopePartB02 = Object.assign({}, Test
     default: '@eexpr:B5${var6}(default)'
   }
 });
+
+var TestDataScopePaths01 = exports.TestDataScopePaths01 = {
+  srcPath: '/a/b\\c\\../d/..\\e//f',
+  opath: '@opath:${srcPath}',
+  ppath: '@ppath:${srcPath}',
+  wpath: '@wpath:${srcPath}'
+};

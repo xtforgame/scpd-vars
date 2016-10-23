@@ -18,6 +18,7 @@ import {
   TestDataScopePartB01,
   TestDataScopePartA02,
   TestDataScopePartB02,
+  TestDataScopePaths01,
 } from './test-data/test-data-scope';
 
 import {
@@ -233,6 +234,21 @@ describe('Template test', () => {
           
           let var5_3ValueInB = scopeB.evalVar('var5-3', new Set());
           expect(var5_3ValueInB, 'var5_3ValueInB is ' + var5_3ValueInB).to.equal('B5B6B7A8A9(default)');
+          done();
+        });
+
+        it('Should be able to eval \'@*path\' expressions (cases)', done => {
+          let scope = new SvScope(TestDataScopePaths01);
+          scope.evalVars();
+
+          let srcPath = scope.evalVar('srcPath', new Set());
+          let opath = scope.evalVar('opath', new Set());
+          let ppath = scope.evalVar('ppath', new Set());
+          let wpath = scope.evalVar('wpath', new Set());
+
+          expect(opath, 'opath is ' + opath).to.equal(path.normalize(srcPath));
+          expect(ppath, 'ppath is ' + ppath).to.equal('/a/b/e/f');
+          expect(wpath, 'wpath is ' + wpath).to.equal('\\a\\b\\e\\f');
           done();
         });
 

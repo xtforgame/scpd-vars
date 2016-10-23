@@ -13,6 +13,12 @@ var _nonGenerics = require('./non-generics');
 
 var _scopeChain = require('./scope-chain');
 
+var _path2 = require('./path');
+
+var _path3 = _interopRequireDefault(_path2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var defaultExprTypesDefine = {
@@ -46,6 +52,24 @@ var defaultExprTypesDefine = {
       }
 
       throw Error('@dexpr: No matched case for switch value:' + switchValue);
+    }
+  },
+  '@opath': {
+    eval: function _eval(exprObj, evalingSet, ExpressionClass) {
+      var _path = ExpressionClass.stringEvaluator(exprObj, evalingSet).replace(/\\/g, '/');
+      return _path3.default.normalize(_path);
+    }
+  },
+  '@ppath': {
+    eval: function _eval(exprObj, evalingSet, ExpressionClass) {
+      var _path = ExpressionClass.stringEvaluator(exprObj, evalingSet).replace(/\\/g, '/');
+      return _path3.default.posix.normalize(_path);
+    }
+  },
+  '@wpath': {
+    eval: function _eval(exprObj, evalingSet, ExpressionClass) {
+      var _path = ExpressionClass.stringEvaluator(exprObj, evalingSet).replace(/\\/g, '/');
+      return _path3.default.win32.normalize(_path);
     }
   }
 };
@@ -459,10 +483,19 @@ function createScopeLayerClass(SvExpression, SvScope) {
       key: 'evalVars',
       value: function evalVars() {
         if (!this._mainScope) {
-          return false;
+          return null;
         }
 
-        this._mainScope.evalVars();
+        return this._mainScope.evalVars();
+      }
+    }, {
+      key: 'getEvaledVars',
+      value: function getEvaledVars() {
+        if (!this._mainScope) {
+          return null;
+        }
+
+        return this._mainScope.getEvaledVars();
       }
     }, {
       key: 'evalVar',

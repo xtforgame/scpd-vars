@@ -84,3 +84,10 @@ export let TestDataScopePartB02 = Object.assign({}, TestDataScopePartB01, {
     default: '@eexpr:B5${var6}(default)',
   },
 });
+
+export let TestDataScopePaths01 = {
+  srcPath: '/a/b\\c\\../d/..\\e//f',
+  opath: '@opath:${srcPath}',
+  ppath: '@ppath:${srcPath}',
+  wpath: '@wpath:${srcPath}',
+};

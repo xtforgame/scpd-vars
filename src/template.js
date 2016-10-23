@@ -15,6 +15,8 @@ import {
   SvScopeChain,
 } from './scope-chain';
 
+import path from './path';
+
 const defaultExprTypesDefine = {
   '@eexpr': {},
   '@nexpr': {
@@ -46,6 +48,24 @@ const defaultExprTypesDefine = {
       }
 
       throw Error('@dexpr: No matched case for switch value:' + switchValue);
+    },
+  },
+  '@opath': {
+    eval: (exprObj, evalingSet, ExpressionClass) => {
+      let _path = ExpressionClass.stringEvaluator(exprObj, evalingSet).replace(/\\/g, '/');
+      return path.normalize(_path);
+    },
+  },
+  '@ppath': {
+    eval: (exprObj, evalingSet, ExpressionClass) => {
+      let _path = ExpressionClass.stringEvaluator(exprObj, evalingSet).replace(/\\/g, '/');
+      return path.posix.normalize(_path);
+    },
+  },
+  '@wpath': {
+    eval: (exprObj, evalingSet, ExpressionClass) => {
+      let _path = ExpressionClass.stringEvaluator(exprObj, evalingSet).replace(/\\/g, '/');
+      return path.win32.normalize(_path);
     },
   },
 };
@@ -400,10 +420,18 @@ function createScopeLayerClass(SvExpression, SvScope){
 
     evalVars(){
       if(!this._mainScope){
-        return false;
+        return null;
       }
 
-      this._mainScope.evalVars();
+      return this._mainScope.evalVars();
+    }
+
+    getEvaledVars(){
+      if(!this._mainScope){
+        return null;
+      }
+
+      return this._mainScope.getEvaledVars();
     }
 
     evalVar(varName){

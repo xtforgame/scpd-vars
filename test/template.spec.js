@@ -224,6 +224,21 @@ describe('Template test', function () {
           done();
         });
 
+        it('Should be able to eval \'@*path\' expressions (cases)', function (done) {
+          var scope = new SvScope(_testDataScope.TestDataScopePaths01);
+          scope.evalVars();
+
+          var srcPath = scope.evalVar('srcPath', new Set());
+          var opath = scope.evalVar('opath', new Set());
+          var ppath = scope.evalVar('ppath', new Set());
+          var wpath = scope.evalVar('wpath', new Set());
+
+          expect(opath, 'opath is ' + opath).to.equal(_path2.default.normalize(srcPath));
+          expect(ppath, 'ppath is ' + ppath).to.equal('/a/b/e/f');
+          expect(wpath, 'wpath is ' + wpath).to.equal('\\a\\b\\e\\f');
+          done();
+        });
+
         it('Should be able to eval vars while creating', function (done) {
           var scope = new SvScope(_testDataScope.TestDataScopeNormal01, {
             autoEval: true
