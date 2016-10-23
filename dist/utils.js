@@ -17,24 +17,21 @@ function normalizeReplacement(str) {
   return str.replace(/\$/g, '$$$$');
 }
 
-var EscapeChar = '\\';
+var EscapeChar = '$';
 var DollarChar = '$';
-var DoubleEscapeChar = EscapeChar + EscapeChar;
 var EscapeCharWithDollar = EscapeChar + '$';
 
 var EscapeCharReg = makeSearchReg(EscapeChar);
 var DollarCharReg = makeSearchReg(DollarChar);
-var DoubleEscapeCharReg = makeSearchReg(DoubleEscapeChar);
 var EscapeCharWithDollarReg = makeSearchReg(EscapeCharWithDollar);
 
 var EscapeCharReplacement = normalizeReplacement(EscapeChar);
 var DollarCharReplacement = normalizeReplacement(DollarChar);
-var DoubleEscapeCharReplacement = normalizeReplacement(DoubleEscapeChar);
 var EscapeCharWithDollarReplacement = normalizeReplacement(EscapeCharWithDollar);
 
 exports.EscapeChar = EscapeChar;
 function escapeString(rawSrting) {
-  return rawSrting.replace(EscapeCharReg, DoubleEscapeCharReplacement).replace(DollarCharReg, EscapeCharWithDollarReplacement);
+  return rawSrting.replace(DollarCharReg, EscapeCharWithDollarReplacement);
 }
 
 function unescapeString(escapedString) {

@@ -37,19 +37,17 @@ function normalizeReplacement(str){
   return str.replace(/\$/g,'$$$$');
 }
 
-const EscapeChar = '\\';
+//const EscapeChar = '\\';
+const EscapeChar = '$';
 const DollarChar = '$';
-const DoubleEscapeChar = EscapeChar + EscapeChar;
 const EscapeCharWithDollar = EscapeChar + '$';
 
 const EscapeCharReg = makeSearchReg(EscapeChar);
 const DollarCharReg = makeSearchReg(DollarChar);
-const DoubleEscapeCharReg = makeSearchReg(DoubleEscapeChar);
 const EscapeCharWithDollarReg = makeSearchReg(EscapeCharWithDollar);
 
 const EscapeCharReplacement = normalizeReplacement(EscapeChar);
 const DollarCharReplacement = normalizeReplacement(DollarChar);
-const DoubleEscapeCharReplacement = normalizeReplacement(DoubleEscapeChar);
 const EscapeCharWithDollarReplacement = normalizeReplacement(EscapeCharWithDollar);
 
 export {
@@ -57,7 +55,7 @@ export {
 };
 
 export function escapeString(rawSrting){
-  return rawSrting.replace(EscapeCharReg, DoubleEscapeCharReplacement).replace(DollarCharReg, EscapeCharWithDollarReplacement);
+  return rawSrting.replace(DollarCharReg, EscapeCharWithDollarReplacement);
 }
 
 export function unescapeString(escapedString){
