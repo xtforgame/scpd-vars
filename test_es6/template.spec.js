@@ -557,6 +557,29 @@ describe('Template test', () => {
           done();
         });
 
+        it('Should be able to clean temporary scopes after the query', done => {
+          let scopeChain = new SvScopeChain();
+          let scopeLayer = new SvScopeLayer(scopeChain, {});
+          scopeLayer.initScope(TestDataScopeNormal01);
+          scopeLayer.evalVars();
+
+          let result = scopeLayer.query('@eexpr:${var90}', {
+            after: {var90: '@eexpr:${var1}'},
+          });
+          expect(result, 'result is ' + result).to.equal('123456789');
+
+          let errorThrown = false;
+          try{
+            scopeLayer.query('@eexpr:${var90}');
+          }catch(e){
+            if(e.message.indexOf('Eval failed') !== -1){
+              errorThrown = true;
+            }
+          }
+          expect(errorThrown).to.equal(true);
+          done();
+        });
+
         it('Should be able to eval vars with temp varData(head)', done => {
           let simpleStack = [];
           let simpleFind = (visitorScope, varName) => {

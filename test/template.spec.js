@@ -542,6 +542,29 @@ describe('Template test', function () {
           done();
         });
 
+        it('Should be able to clean temporary scopes after the query', function (done) {
+          var scopeChain = new _scopeChain.SvScopeChain();
+          var scopeLayer = new SvScopeLayer(scopeChain, {});
+          scopeLayer.initScope(_testDataScope.TestDataScopeNormal01);
+          scopeLayer.evalVars();
+
+          var result = scopeLayer.query('@eexpr:${var90}', {
+            after: { var90: '@eexpr:${var1}' }
+          });
+          expect(result, 'result is ' + result).to.equal('123456789');
+
+          var errorThrown = false;
+          try {
+            scopeLayer.query('@eexpr:${var90}');
+          } catch (e) {
+            if (e.message.indexOf('Eval failed') !== -1) {
+              errorThrown = true;
+            }
+          }
+          expect(errorThrown).to.equal(true);
+          done();
+        });
+
         it('Should be able to eval vars with temp varData(head)', function (done) {
           var simpleStack = [];
           var simpleFind = function simpleFind(visitorScope, varName) {

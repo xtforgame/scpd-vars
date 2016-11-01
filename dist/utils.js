@@ -50,7 +50,7 @@ function unescapeString(escapedString) {
 }
 
 function findContentInBracket(rawSrting) {
-  var start = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+  var start = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
 
   var bracketStart = rawSrting.indexOf('${', start);
   while (bracketStart !== -1) {
