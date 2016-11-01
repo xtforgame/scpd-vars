@@ -468,7 +468,11 @@ function createScopeLayerClass(SvExpression, SvScope){
       let result = null;
       try{
         this._setupNodesBeforeQuery(varDataMap);
-        result = this.eval(exprRawData);
+        if(Array.isArray(exprRawData)){
+          result = exprRawData.map(expr => this.eval(expr));
+        }else{
+          result = this.eval(exprRawData);
+        }
       }catch(e){
         this._cleanNodesAfterQuery();
         throw e;

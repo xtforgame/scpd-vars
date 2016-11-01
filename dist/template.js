@@ -536,10 +536,18 @@ function createScopeLayerClass(SvExpression, SvScope) {
     }, {
       key: 'query',
       value: function query(exprRawData, varDataMap) {
+        var _this4 = this;
+
         var result = null;
         try {
           this._setupNodesBeforeQuery(varDataMap);
-          result = this.eval(exprRawData);
+          if (Array.isArray(exprRawData)) {
+            result = exprRawData.map(function (expr) {
+              return _this4.eval(expr);
+            });
+          } else {
+            result = this.eval(exprRawData);
+          }
         } catch (e) {
           this._cleanNodesAfterQuery();
           throw e;
