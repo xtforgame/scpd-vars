@@ -14,6 +14,8 @@ import {
   TestDataScopeRecu01,
   TestDataScopeNormal02,
   TestDataScopeRecu02,
+  TestDataScopeDefaultValue,
+  TestDataScopeNotExpression,
   TestDataScopePartA01,
   TestDataScopePartB01,
   TestDataScopePartA02,
@@ -160,6 +162,22 @@ describe('Template test', () => {
             }
           }
           expect(errorThrown).to.equal(true);
+          done();
+        });
+
+        it('Should be able to apply default value', done => {
+          let scope = new SvScope(TestDataScopeDefaultValue);
+          scope.evalVars();
+          let varValue = scope.evalVar('var1', new Set());
+          expect(varValue, 'varValue is ' + varValue).to.equal('<not found>');
+          done();
+        });
+
+        it('Should be able to eval \'@nexpr\' expressions', done => {
+          let scope = new SvScope(TestDataScopeNotExpression);
+          scope.evalVars();
+          let varValue = scope.evalVar('var1', new Set());
+          expect(varValue, 'varValue is ' + varValue).to.equal('@eexpr:1${var2}');
           done();
         });
 

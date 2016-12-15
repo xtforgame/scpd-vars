@@ -30,6 +30,19 @@ export let TestDataScopeRecu02 = Object.assign({}, TestDataScopeNormal02, {
   var9: '@eexpr:9${var1}',
 });
 
+export let TestDataScopeDefaultValue = {
+  var1: {
+    "default": "<not found>",
+    "exprBody": "${var10}",
+    "exprType": "@eexpr"
+  }
+};
+
+export let TestDataScopeNotExpression = {
+  var1: '@nexpr:@eexpr:1${var2}',
+  var2: '2',
+};
+
 export let TestDataScopePartA01 = {
   var6: '@eexpr:A6${var7}',
   var7: '@eexpr:A7${var8}',

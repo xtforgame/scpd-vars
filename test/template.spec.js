@@ -154,6 +154,22 @@ describe('Template test', function () {
           done();
         });
 
+        it('Should be able to apply default value', function (done) {
+          var scope = new SvScope(_testDataScope.TestDataScopeDefaultValue);
+          scope.evalVars();
+          var varValue = scope.evalVar('var1', new Set());
+          expect(varValue, 'varValue is ' + varValue).to.equal('<not found>');
+          done();
+        });
+
+        it('Should be able to eval \'@nexpr\' expressions', function (done) {
+          var scope = new SvScope(_testDataScope.TestDataScopeNotExpression);
+          scope.evalVars();
+          var varValue = scope.evalVar('var1', new Set());
+          expect(varValue, 'varValue is ' + varValue).to.equal('@eexpr:1${var2}');
+          done();
+        });
+
         it('Should be able to eval vars by using an external search function', function (done) {
           var simpleStack = [];
           var simpleFind = function simpleFind(visitorScope, varName) {

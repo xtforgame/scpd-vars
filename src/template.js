@@ -21,7 +21,7 @@ const defaultExprTypesDefine = {
   '@eexpr': {},
   '@nexpr': {
     tokenize: (exprObj, ExpressionClass) => {
-      return [exprObj.exprInfo.rawData];
+      return [exprObj.exprInfo.rawData.substr('@nexpr:'.length)];
     },
   },
   '@dexpr': {

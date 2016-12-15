@@ -25,7 +25,7 @@ var defaultExprTypesDefine = {
   '@eexpr': {},
   '@nexpr': {
     tokenize: function tokenize(exprObj, ExpressionClass) {
-      return [exprObj.exprInfo.rawData];
+      return [exprObj.exprInfo.rawData.substr('@nexpr:'.length)];
     }
   },
   '@dexpr': {

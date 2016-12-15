@@ -35,6 +35,19 @@ var TestDataScopeRecu02 = exports.TestDataScopeRecu02 = Object.assign({}, TestDa
   var9: '@eexpr:9${var1}'
 });
 
+var TestDataScopeDefaultValue = exports.TestDataScopeDefaultValue = {
+  var1: {
+    "default": "<not found>",
+    "exprBody": "${var10}",
+    "exprType": "@eexpr"
+  }
+};
+
+var TestDataScopeNotExpression = exports.TestDataScopeNotExpression = {
+  var1: '@nexpr:@eexpr:1${var2}',
+  var2: '2'
+};
+
 var TestDataScopePartA01 = exports.TestDataScopePartA01 = {
   var6: '@eexpr:A6${var7}',
   var7: '@eexpr:A7${var8}',
