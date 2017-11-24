@@ -10,7 +10,7 @@ exports.createEmplyFindVarResult = createEmplyFindVarResult;
 
 
 function makeSearchReg(str) {
-  return new RegExp(str.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|<>\-\&])/g, '\\$&'), 'g');
+  return new RegExp(str.replace(/([/,!\\^${}[\]().*+?|<>\-&])/g, '\\$&'), 'g');
 }
 
 function normalizeReplacement(str) {
@@ -21,12 +21,8 @@ var EscapeChar = '$';
 var DollarChar = '$';
 var EscapeCharWithDollar = EscapeChar + '$';
 
-var EscapeCharReg = makeSearchReg(EscapeChar);
 var DollarCharReg = makeSearchReg(DollarChar);
-var EscapeCharWithDollarReg = makeSearchReg(EscapeCharWithDollar);
 
-var EscapeCharReplacement = normalizeReplacement(EscapeChar);
-var DollarCharReplacement = normalizeReplacement(DollarChar);
 var EscapeCharWithDollarReplacement = normalizeReplacement(EscapeCharWithDollar);
 
 exports.EscapeChar = EscapeChar;

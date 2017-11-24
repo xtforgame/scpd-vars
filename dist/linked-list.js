@@ -10,7 +10,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var LinkedListNode = function () {
+var LinkedListNode = exports.LinkedListNode = function () {
   function LinkedListNode(list, data, prev, next) {
     _classCallCheck(this, LinkedListNode);
 
@@ -65,21 +65,19 @@ var LinkedList = exports.LinkedList = (_temp = _class = function () {
       if (!this.head) {
         this.head = newNode;
         this.tail = newNode;
+      } else if (!tarNode) {
+        newNode.prev = this.tail;
+        this.tail.next = newNode;
+        this.tail = newNode;
+      } else if (tarNode === this.head) {
+        newNode.next = this.head;
+        this.head.prev = newNode;
+        this.head = newNode;
       } else {
-        if (!tarNode) {
-          newNode.prev = this.tail;
-          this.tail.next = newNode;
-          this.tail = newNode;
-        } else if (tarNode === this.head) {
-          newNode.next = this.head;
-          this.head.prev = newNode;
-          this.head = newNode;
-        } else {
-          tarNode.prev.next = newNode;
-          newNode.prev = tarNode.prev;
-          newNode.next = tarNode;
-          tarNode.prev = newNode;
-        }
+        tarNode.prev.next = newNode;
+        newNode.prev = tarNode.prev;
+        newNode.next = tarNode;
+        tarNode.prev = newNode;
       }
 
       this._size++;

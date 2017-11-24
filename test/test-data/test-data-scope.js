@@ -1,4 +1,4 @@
-export let TestDataScopeNormal01 = {
+export const TestDataScopeNormal01 = {
   var1: '@eexpr:1${var2}',
   var2: '@eexpr:2${var3}',
   var3: '@eexpr:3${var4}',
@@ -10,7 +10,7 @@ export let TestDataScopeNormal01 = {
   var9: '@eexpr:9',
 };
 
-export let TestDataScopeNormal02 = Object.assign({}, TestDataScopeNormal01, {
+export const TestDataScopeNormal02 = Object.assign({}, TestDataScopeNormal01, {
   var6: {
     exprType: '@eexpr',
     exprBody: '5${var11}',
@@ -22,15 +22,15 @@ export let TestDataScopeNormal02 = Object.assign({}, TestDataScopeNormal01, {
   },
 });
 
-export let TestDataScopeRecu01 = Object.assign({}, TestDataScopeNormal01, {
+export const TestDataScopeRecu01 = Object.assign({}, TestDataScopeNormal01, {
   var9: '@eexpr:9${var1}',
 });
 
-export let TestDataScopeRecu02 = Object.assign({}, TestDataScopeNormal02, {
+export const TestDataScopeRecu02 = Object.assign({}, TestDataScopeNormal02, {
   var9: '@eexpr:9${var1}',
 });
 
-export let TestDataScopeDefaultValue = {
+export const TestDataScopeDefaultValue = {
   var1: {
     default: '<not found>',
     exprBody: '${var10}',
@@ -38,19 +38,19 @@ export let TestDataScopeDefaultValue = {
   },
 };
 
-export let TestDataScopeNotExpression = {
+export const TestDataScopeNotExpression = {
   var1: '@nexpr:@eexpr:1${var2}',
   var2: '2',
 };
 
-export let TestDataScopePartA01 = {
+export const TestDataScopePartA01 = {
   var6: '@eexpr:A6${var7}',
   var7: '@eexpr:A7${var8}',
   var8: '@eexpr:A8${var9}',
   var9: '@eexpr:A9',
 };
 
-export let TestDataScopePartB01 = {
+export const TestDataScopePartB01 = {
   var1: '@eexpr:B1${var2}',
   var2: '@eexpr:B2${var3}',
   var3: '@eexpr:B3${var4}',
@@ -63,9 +63,9 @@ export let TestDataScopePartB01 = {
   var7: '@eexpr:B7${var8}',
 };
 
-export let TestDataScopePartA02 = Object.assign({}, TestDataScopePartA01);
+export const TestDataScopePartA02 = Object.assign({}, TestDataScopePartA01);
 
-export let TestDataScopePartB02 = Object.assign({}, TestDataScopePartB01, {
+export const TestDataScopePartB02 = Object.assign({}, TestDataScopePartB01, {
   var5: {
     exprType: '@dexpr',
     exprBody: {
@@ -98,7 +98,7 @@ export let TestDataScopePartB02 = Object.assign({}, TestDataScopePartB01, {
   },
 });
 
-export let TestDataScopePaths01 = {
+export const TestDataScopePaths01 = {
   srcPath: '/a/b\\c\\../d/..\\e//f',
   opath: '@opath:${srcPath}',
   ppath: '@ppath:${srcPath}',

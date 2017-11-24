@@ -193,7 +193,7 @@ function createExpressionClass(config) {
       value: function normalizeExprInfo(data) {
         var exprTypeName = null;
         var exprBody = data;
-        var defaultValue = undefined;
+        var defaultValue = void 0;
 
         var plainTextCfg = {
           tokenize: newExpressionClass.plainTextTokenizer,

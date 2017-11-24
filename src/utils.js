@@ -26,44 +26,53 @@ THE SOFTWARE.
 */
 // function replaceall(replaceThis, withThis, inThis) {
 //   withThis = withThis.replace(/\$/g,'$$$$');
-//   return inThis.replace(new RegExp(replaceThis.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|<>\-\&])/g,'\\$&'),'g'), withThis);
+//   return inThis.replace(
+//     new RegExp(
+//       replaceThis.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|<>\-\&])/g,'\\$&'),
+//       'g',
+//     ),
+//     withThis,
+//   );
 // };
 
-function makeSearchReg(str){
-  return new RegExp(str.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|<>\-\&])/g,'\\$&'),'g');
+function makeSearchReg(str) {
+  return new RegExp(str.replace(/([/,!\\^${}[\]().*+?|<>\-&])/g, '\\$&'), 'g');
 }
 
-function normalizeReplacement(str){
-  return str.replace(/\$/g,'$$$$');
+function normalizeReplacement(str) {
+  return str.replace(/\$/g, '$$$$');
 }
 
-//const EscapeChar = '\\';
+// const EscapeChar = '\\';
 const EscapeChar = '$';
 const DollarChar = '$';
-const EscapeCharWithDollar = EscapeChar + '$';
+const EscapeCharWithDollar = `${EscapeChar}$`;
 
-const EscapeCharReg = makeSearchReg(EscapeChar);
+// const EscapeCharReg = makeSearchReg(EscapeChar);
 const DollarCharReg = makeSearchReg(DollarChar);
-const EscapeCharWithDollarReg = makeSearchReg(EscapeCharWithDollar);
+// const EscapeCharWithDollarReg = makeSearchReg(EscapeCharWithDollar);
 
-const EscapeCharReplacement = normalizeReplacement(EscapeChar);
-const DollarCharReplacement = normalizeReplacement(DollarChar);
+// const EscapeCharReplacement = normalizeReplacement(EscapeChar);
+// const DollarCharReplacement = normalizeReplacement(DollarChar);
 const EscapeCharWithDollarReplacement = normalizeReplacement(EscapeCharWithDollar);
 
 export {
-  EscapeChar as EscapeChar,
+  EscapeChar,
 };
 
-export function escapeString(rawSrting){
+export function escapeString(rawSrting) {
   return rawSrting.replace(DollarCharReg, EscapeCharWithDollarReplacement);
 }
 
-export function unescapeString(escapedString){
+export function unescapeString(escapedString) {
   let result = '';
   let substrStart = 0;
-  for(let i = 0; i < escapedString.length; i++) {
-    if(escapedString[i] === EscapeChar){
-      if(i >= escapedString.length - 1 || (escapedString[i + 1] !== EscapeChar && escapedString[i + 1] !== DollarChar)){
+  for (let i = 0; i < escapedString.length; i++) {
+    if (escapedString[i] === EscapeChar) {
+      if (
+          i >= escapedString.length - 1
+          || (escapedString[i + 1] !== EscapeChar && escapedString[i + 1] !== DollarChar)
+      ) {
         // [TODO] handle error
       }
       result += escapedString.substr(substrStart, i - substrStart);
@@ -75,21 +84,21 @@ export function unescapeString(escapedString){
   return result;
 }
 
-export function findContentInBracket(rawSrting, start = 0){
+export function findContentInBracket(rawSrting, start = 0) {
   let bracketStart = rawSrting.indexOf('${', start);
-  while(bracketStart !== -1){
+  while (bracketStart !== -1) {
     let i = bracketStart - 1;
-    for(; i >= 0; i--){
-      if(rawSrting[i] !== EscapeChar){
+    for (; i >= 0; i--) {
+      if (rawSrting[i] !== EscapeChar) {
         break;
       }
     }
-    if((bracketStart - i) % 2){
-      let bracketFinish = rawSrting.indexOf('}', bracketStart + 1);
-      if(bracketFinish === -1){
+    if ((bracketStart - i) % 2) {
+      const bracketFinish = rawSrting.indexOf('}', bracketStart + 1);
+      if (bracketFinish === -1) {
         return [bracketStart, bracketFinish, null];
       }
-      let content = rawSrting.substr(bracketStart + 2, bracketFinish - bracketStart - 2).trim();
+      const content = rawSrting.substr(bracketStart + 2, bracketFinish - bracketStart - 2).trim();
       return [bracketStart, bracketFinish + 1, content];
     }
     bracketStart = rawSrting.indexOf('${', bracketStart + 1);
@@ -97,7 +106,7 @@ export function findContentInBracket(rawSrting, start = 0){
   return null;
 }
 
-export function createEmplyFindVarResult(){
+export function createEmplyFindVarResult() {
   return {
     scope: null,
     var: null,

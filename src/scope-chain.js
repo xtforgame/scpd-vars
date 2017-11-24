@@ -6,99 +6,99 @@ import {
   createEmplyFindVarResult,
 } from './utils';
 
-class SvScopeChainPlaceholder {}
+export class SvScopeChainPlaceholder {}
 
 export class SvScopeChain {
   static Node = LinkedList.Node;
   static Placeholder = SvScopeChainPlaceholder;
 
-  constructor(){
+  constructor() {
     this._map = new Map();
     this._chain = new LinkedList();
     this.findVar = this._findVar.bind(this);
   }
 
-  get length(){
+  get length() {
     return this._chain.length;
   }
 
-  get head(){
+  get head() {
     return this._chain.head;
   }
 
-  get tail(){
+  get tail() {
     return this._chain.tail;
   }
 
-  pushFront(data){
+  pushFront(data) {
     this.delete(data);
-    let node = this._chain.pushFront(data);
+    const node = this._chain.pushFront(data);
     this._map.set(data, node);
     return node;
   }
 
-  pushBack(data){
+  pushBack(data) {
     this.delete(data);
-    let node = this._chain.pushBack(data);
+    const node = this._chain.pushBack(data);
     this._map.set(data, node);
     return node;
   }
 
-  insert(data, tarNode){
+  insert(data, tarNode) {
     this.delete(data);
-    let node = this._chain.insert(data, tarNode);
+    const node = this._chain.insert(data, tarNode);
     this._map.set(data, node);
     return node;
   }
 
-  popFront(){
-    let node = this._chain.popFront();
-    if(node){
+  popFront() {
+    const node = this._chain.popFront();
+    if (node) {
       this._map.delete(node.data);
     }
     return node;
   }
 
-  popBack(){
-    let node = this._chain.popBack();
-    if(node){
+  popBack() {
+    const node = this._chain.popBack();
+    if (node) {
       this._map.delete(node.data);
     }
     return node;
   }
 
-  delete(data){
-    let node = this._map.get(data);
-    if(node){
+  delete(data) {
+    const node = this._map.get(data);
+    if (node) {
       this._map.delete(node.data);
       this._chain.delete(node);
     }
     return node;
   }
 
-  clear(){
+  clear() {
     this._map.clear();
-    return this._chain.clear(tarNode);
+    return this._chain.clear();
   }
 
-  _findVar(visitorScope, varName){
+  _findVar(visitorScope, varName) {
     let result = createEmplyFindVarResult();
     let node = this._chain.tail;
 
-    if(visitorScope){
-      let foundNode = this._map.get(visitorScope);
-      if(foundNode){
+    if (visitorScope) {
+      const foundNode = this._map.get(visitorScope);
+      if (foundNode) {
         node = foundNode.prev;
       }
     }
 
     let currentScope = null;
 
-    while(node){
+    while (node) {
       currentScope = node.data;
-      if(currentScope && !(currentScope instanceof SvScopeChain.Placeholder)){
+      if (currentScope && !(currentScope instanceof SvScopeChain.Placeholder)) {
         result = currentScope.findVarLocal(visitorScope, varName);
-        if(result.var){
+        if (result.var) {
           return result;
         }
       }

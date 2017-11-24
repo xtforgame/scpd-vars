@@ -6,21 +6,40 @@
     "es6": true,
   },
   "rules": {
-    // Disable camelcase check
-    "camelcase": 0,
-
-    // Strict mode
-    "strict": [2, "never"],
-
-    // allow console
-    "no-console": 0,
+    "no-param-reassign": "off",
+    "no-plusplus": "off",
+    "func-names": "off",
+    "no-underscore-dangle": "off",
+    "no-continue": "off",
 
     // Code style
-    "indent": [2, 2],
-    "quotes": [2, "single"],
+    "indent": ["error", 2],
+    "quotes": ["error", "single"],
+    
 
-    "space-in-parens": [2, "never"],
-    "comma-dangle": [2, "always-multiline"],
-    "no-underscore-dangle": 0
-  }
+    "no-console": "off",
+    "max-len": ["warn", { "code": 120, "ignoreUrls": true, "ignoreStrings": true, "ignoreTemplateLiterals": true }],
+    "camelcase": "off", // => maybe enable later
+    "no-use-before-define": ["error", "nofunc"], // do not check class and function
+    "no-unused-vars": ["error", { "args": "none" }],
+    "class-methods-use-this": "off",
+    "no-return-assign": ["error", "except-parens"],
+    "radix": ["error", "as-needed"],
+    "prefer-const": ["error", {"destructuring": "all"}],
+    "comma-dangle": ["error", {
+      "arrays": "always-multiline",
+      "objects": "always-multiline",
+      "imports": "always-multiline",
+      "exports": "always-multiline",
+      "functions": "ignore"
+    }],
+    "no-bitwise": ["error", { "allow": ["~"] }],
+    "no-else-return": "off",
+
+    // import plugin
+    "import/no-unresolved": "off",
+    "import/extensions": "off",
+    "import/no-extraneous-dependencies": "off" // => maybe enable later
+  },
+  "extends": "airbnb"
 }
