@@ -1,5 +1,3 @@
-
-
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -269,13 +267,13 @@ win32.extname = function (path) {
 
 win32.format = function (pathObject) {
   if (!util.isObject(pathObject)) {
-    throw new TypeError("Parameter 'pathObject' must be an object, not " + (typeof pathObject === 'undefined' ? 'undefined' : _typeof(pathObject)));
+    throw new TypeError('Parameter \'pathObject\' must be an object, not ' + (typeof pathObject === 'undefined' ? 'undefined' : _typeof(pathObject)));
   }
 
   var root = pathObject.root || '';
 
   if (!util.isString(root)) {
-    throw new TypeError("'pathObject.root' must be a string or undefined, not " + _typeof(pathObject.root));
+    throw new TypeError('\'pathObject.root\' must be a string or undefined, not ' + _typeof(pathObject.root));
   }
 
   var dir = pathObject.dir;
@@ -291,11 +289,11 @@ win32.format = function (pathObject) {
 
 win32.parse = function (pathString) {
   if (!util.isString(pathString)) {
-    throw new TypeError("Parameter 'pathString' must be a string, not " + (typeof pathString === 'undefined' ? 'undefined' : _typeof(pathString)));
+    throw new TypeError('Parameter \'pathString\' must be a string, not ' + (typeof pathString === 'undefined' ? 'undefined' : _typeof(pathString)));
   }
   var allParts = win32SplitPath(pathString);
   if (!allParts || allParts.length !== 4) {
-    throw new TypeError("Invalid path '" + pathString + "'");
+    throw new TypeError('Invalid path \'' + pathString + '\'');
   }
   return {
     root: allParts[0],
@@ -437,13 +435,13 @@ posix.extname = function (path) {
 
 posix.format = function (pathObject) {
   if (!util.isObject(pathObject)) {
-    throw new TypeError("Parameter 'pathObject' must be an object, not " + (typeof pathObject === 'undefined' ? 'undefined' : _typeof(pathObject)));
+    throw new TypeError('Parameter \'pathObject\' must be an object, not ' + (typeof pathObject === 'undefined' ? 'undefined' : _typeof(pathObject)));
   }
 
   var root = pathObject.root || '';
 
   if (!util.isString(root)) {
-    throw new TypeError("'pathObject.root' must be a string or undefined, not " + _typeof(pathObject.root));
+    throw new TypeError('\'pathObject.root\' must be a string or undefined, not ' + _typeof(pathObject.root));
   }
 
   var dir = pathObject.dir ? pathObject.dir + posix.sep : '';
@@ -453,11 +451,11 @@ posix.format = function (pathObject) {
 
 posix.parse = function (pathString) {
   if (!util.isString(pathString)) {
-    throw new TypeError("Parameter 'pathString' must be a string, not " + (typeof pathString === 'undefined' ? 'undefined' : _typeof(pathString)));
+    throw new TypeError('Parameter \'pathString\' must be a string, not ' + (typeof pathString === 'undefined' ? 'undefined' : _typeof(pathString)));
   }
   var allParts = posixSplitPath(pathString);
   if (!allParts || allParts.length !== 4) {
-    throw new TypeError("Invalid path '" + pathString + "'");
+    throw new TypeError('Invalid path \'' + pathString + '\'');
   }
   allParts[1] = allParts[1] || '';
   allParts[2] = allParts[2] || '';

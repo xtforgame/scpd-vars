@@ -1,55 +1,65 @@
-'use strict';
+/*eslint-disable no-unused-vars, no-undef, no-unused-expressions */
 
-var _chai = require('chai');
+import chai from 'chai';
 
-var _chai2 = _interopRequireDefault(_chai);
+import path from 'path';
 
-var _path = require('path');
+import scpdVars, {
+  escapeString,
+  unescapeString,
+  findContentInBracket,
+  SvTemplate,
+  defaultExprTypesDefine,
+  EscapeChar,
+  createEmplyFindVarResult,
+} from '../dist';
 
-var _path2 = _interopRequireDefault(_path);
+import {
+  SvScopeChain,
+} from '../dist/scope-chain';
 
-var _dist = require('../dist');
+import {
+  TestDataScopeNormal01,
+  TestDataScopeRecu01,
+  TestDataScopePartA01,
+  TestDataScopePartB01,
+} from './test-data/test-data-scope';
 
-var _dist2 = _interopRequireDefault(_dist);
+var expect = chai.expect;
+var assert = chai.assert;
 
-var _scopeChain = require('../dist/scope-chain');
-
-var _testDataScope = require('./test-data/test-data-scope');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var expect = _chai2.default.expect;
-var assert = _chai2.default.assert;
-
-describe('Scope Chain test', function () {
-  var _template = new _dist.SvTemplate(_dist.defaultExprTypesDefine);
-  var SvScope = _template.getScopeClass();
-  describe('Basic', function () {
-    it('Should be able to eval vars by using an external search function', function (done) {
-      var scopChain = new _scopeChain.SvScopeChain();
+describe('Scope Chain test', () => {
+  let _template = new SvTemplate(defaultExprTypesDefine);
+  let SvScope = _template.getScopeClass();
+  describe('Basic', () => {
+    it('Should be able to eval vars by using an external search function', done => {
+      let scopChain = new SvScopeChain();
       scopChain.pushBack();
 
-      var scopeA = new SvScope(_testDataScope.TestDataScopePartA01, {
-        findVar: scopChain.findVar
-      });
+      let scopeA = new SvScope(TestDataScopePartA01,
+        {
+          findVar: scopChain.findVar,
+        });
       scopChain.pushBack(scopeA);
       scopeA.evalVars();
 
-      var scopeB = new SvScope(_testDataScope.TestDataScopePartB01, {
-        findVar: scopChain.findVar
-      });
+      let scopeB = new SvScope(TestDataScopePartB01,
+        {
+          findVar: scopChain.findVar,
+        });
       scopChain.pushBack(scopeB);
       scopeB.evalVars();
 
-      var var1ValueInB = scopeB.evalVar('var1', new Set());
+      let var1ValueInB = scopeB.evalVar('var1', new Set());
       expect(var1ValueInB, 'var1ValueInB is ' + var1ValueInB).to.equal('B1B2B3B4B5B6B7A8A9');
-
-      var var7ValueInA = scopeA.evalVar('var7', new Set());
+      
+      let var7ValueInA = scopeA.evalVar('var7', new Set());
       expect(var7ValueInA, 'var7ValueInA is ' + var7ValueInA).to.equal('A7A8A9');
 
-      var var7ValueInB = scopeB.evalVar('var7', new Set());
+      let var7ValueInB = scopeB.evalVar('var7', new Set());
       expect(var7ValueInB, 'var7ValueInB is ' + var7ValueInB).to.equal('B7A8A9');
       done();
     });
   });
 });
+

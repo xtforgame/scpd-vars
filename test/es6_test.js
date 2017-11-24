@@ -1,16 +1,11 @@
-'use strict';
+/*eslint-disable no-unused-vars, no-undef */
+//gulp test:build
+//mocha --ui=tdd test
+//gulp test:build && mocha --ui=tdd test/es6_test.js
 
-var _dec, _class;
+import chai from 'chai';
 
-var _chai = require('chai');
-
-var _chai2 = _interopRequireDefault(_chai);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var expect = _chai2.default.expect;
+var expect = chai.expect;
 
 function az_decorator_test(value) {
   return function decorator(target) {
@@ -18,70 +13,106 @@ function az_decorator_test(value) {
   };
 }
 
-var Es6Decorator = (_dec = az_decorator_test(true), _dec(_class = function Es6Decorator() {
-  _classCallCheck(this, Es6Decorator);
-}) || _class);
+@az_decorator_test(true)
+class Es6Decorator {
+  constructor() {
+    //console.log('az_gulp_decorator_test :', Es6Decorator.az_decorator_test);
+    //console.log('az_gulp_decorator_test :', this.constructor.az_decorator_test);
+  }
+}
 
+describe('Es6 features test', function(){
+  describe('Decorator test 1: Add member to class', function(){
 
-describe('Es6 features test', function () {
-  describe('Decorator test 1: Add member to class', function () {
+    let inst = new Es6Decorator();
 
-    var inst = new Es6Decorator();
-
-    it('<class_name>.<var_name>', function (done) {
+    it('<class_name>.<var_name>', function(done){
       expect(Es6Decorator.az_decorator_test).to.equal(true);
       done();
     });
 
-    it('<inst_name>.constructor.<var_name>', function (done) {
+    it('<inst_name>.constructor.<var_name>', function(done){
       expect(inst.constructor.az_decorator_test).to.equal(true);
       done();
     });
+
   });
 
-  describe('Promise test 1: Basic', function () {
+  describe('Promise test 1: Basic', function(){
 
-    function promise_test_01() {
-      return new Promise(function (resolve, reject) {
+    function promise_test_01(){
+      return new Promise(function(resolve, reject) {
         resolve(true);
       });
     }
 
-    function promise_test_02() {
-      return new Promise(function (resolve, reject) {
+    function promise_test_02(){
+      return new Promise(function(resolve, reject) {
         reject(true);
       });
     }
 
-    it('.then()', function () {
-      return promise_test_01().then(function (result) {
+    it('.then()', function(){
+      return promise_test_01()
+      .then(result => {
         expect(result).to.equal(true);
       });
     });
 
-    it('.catch()', function () {
-      return promise_test_02().then().catch(function (error) {
+    it('.catch()', function(){
+      return promise_test_02()
+      .then()
+      .catch(error => {
         expect(error).to.equal(true);
       });
     });
+
   });
 
-  describe('Promise test 2: eachSeries', function () {
+
+  describe('Promise test 2: eachSeries', function(){
 
     function asyncEachSeries(in_array, in_func, start_value) {
-      return in_array.reduce(function (previousPromise, currentValue, currentIndex, array) {
-        return previousPromise.then(function (previousValue) {
+      return in_array.reduce((previousPromise, currentValue, currentIndex, array) => {
+        return previousPromise.then(previousValue => {
           return in_func(previousValue, currentValue, currentIndex, array);
         });
       }, Promise.resolve(start_value));
     }
 
-    it('asyncEachSeries', function () {
-      return asyncEachSeries([0, 1, 2, 3, 4, 5, 6], function (previousValue, currentValue, currentIndex, array) {
+    it('asyncEachSeries', function(){
+      return asyncEachSeries([0, 1, 2, 3, 4, 5, 6], (previousValue, currentValue, currentIndex, array) => {
         return previousValue + currentValue;
-      }, 0).then(function (result) {
+      }, 0)
+      .then(result => {
         expect(result).to.equal(21);
       });
     });
+
+  });
+
+});
+
+/*
+
+var chai = require("chai");
+var should = require('chai').should();
+
+function cccc(){
+  return 1;
+}
+
+suite("TestRun", function(){
+  test("task1", function(done){
+    //chai.assert.equal(cccc(),1);
+    cccc().should.equal(1);
+    done();
+  });
+  test("task2", function(done){
+    //chai.assert.equal(cccc(),2);
+    cccc().should.equal(2);
+    done();
   });
 });
+
+*/

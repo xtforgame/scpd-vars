@@ -461,9 +461,9 @@ function createScopeLayerClass(SvExpression, SvScope) {
           return false;
         }
 
-        var _nodeDefines$name = this._nodeDefines[name];
-        var scope = _nodeDefines$name.scope;
-        var node = _nodeDefines$name.node;
+        var _nodeDefines$name = this._nodeDefines[name],
+            scope = _nodeDefines$name.scope,
+            node = _nodeDefines$name.node;
 
         var prevNode = node.prev;
         var onRemoved = this._nodeDefines[name].onRemoved || function (node) {

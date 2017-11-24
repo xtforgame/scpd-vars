@@ -19,7 +19,7 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-'use strict';
+
 
 
 var isWindows = process.platform === 'win32';
@@ -91,25 +91,25 @@ var win32 = {};
 function win32SplitPath(filename) {
   // Separate device+slash from tail
   var result = splitDeviceRe.exec(filename),
-      device = (result[1] || '') + (result[2] || ''),
-      tail = result[3] || '';
+    device = (result[1] || '') + (result[2] || ''),
+    tail = result[3] || '';
   // Split the tail into dir, basename and extension
   var result2 = splitTailRe.exec(tail),
-      dir = result2[1],
-      basename = result2[2],
-      ext = result2[3];
+    dir = result2[1],
+    basename = result2[2],
+    ext = result2[3];
   return [device, dir, basename, ext];
 }
 
 function win32StatPath(path) {
   var result = splitDeviceRe.exec(path),
-      device = result[1] || '',
-      isUnc = !!device && device[1] !== ':';
+    device = result[1] || '',
+    isUnc = !!device && device[1] !== ':';
   return {
     device: device,
     isUnc: isUnc,
     isAbsolute: isUnc || !!result[2], // UNC paths are always absolute
-    tail: result[3]
+    tail: result[3],
   };
 }
 
@@ -120,8 +120,8 @@ function normalizeUNCRoot(device) {
 // path.resolve([from ...], to)
 win32.resolve = function() {
   var resolvedDevice = '',
-      resolvedTail = '',
-      resolvedAbsolute = false;
+    resolvedTail = '',
+    resolvedAbsolute = false;
 
   for (var i = arguments.length - 1; i >= -1; i--) {
     var path;
@@ -151,10 +151,10 @@ win32.resolve = function() {
     }
 
     var result = win32StatPath(path),
-        device = result.device,
-        isUnc = result.isUnc,
-        isAbsolute = result.isAbsolute,
-        tail = result.tail;
+      device = result.device,
+      isUnc = result.isUnc,
+      isAbsolute = result.isAbsolute,
+      tail = result.tail;
 
     if (device &&
         resolvedDevice &&
@@ -197,11 +197,11 @@ win32.resolve = function() {
 
 win32.normalize = function(path) {
   var result = win32StatPath(path),
-      device = result.device,
-      isUnc = result.isUnc,
-      isAbsolute = result.isAbsolute,
-      tail = result.tail,
-      trailingSlash = /[\\\/]$/.test(tail);
+    device = result.device,
+    isUnc = result.isUnc,
+    isAbsolute = result.isAbsolute,
+    tail = result.tail,
+    trailingSlash = /[\\\/]$/.test(tail);
 
   // Normalize the tail path
   tail = normalizeArray(tail.split(/[\\\/]+/), !isAbsolute).join('\\');
@@ -331,8 +331,8 @@ win32._makeLong = function(path) {
 
 win32.dirname = function(path) {
   var result = win32SplitPath(path),
-      root = result[0],
-      dir = result[1];
+    root = result[0],
+    dir = result[1];
 
   if (!root && !dir) {
     // No dirname whatsoever
@@ -366,7 +366,7 @@ win32.extname = function(path) {
 win32.format = function(pathObject) {
   if (!util.isObject(pathObject)) {
     throw new TypeError(
-        "Parameter 'pathObject' must be an object, not " + typeof pathObject
+        'Parameter \'pathObject\' must be an object, not ' + typeof pathObject
     );
   }
 
@@ -374,7 +374,7 @@ win32.format = function(pathObject) {
 
   if (!util.isString(root)) {
     throw new TypeError(
-        "'pathObject.root' must be a string or undefined, not " +
+        '\'pathObject.root\' must be a string or undefined, not ' +
         typeof pathObject.root
     );
   }
@@ -394,19 +394,19 @@ win32.format = function(pathObject) {
 win32.parse = function(pathString) {
   if (!util.isString(pathString)) {
     throw new TypeError(
-        "Parameter 'pathString' must be a string, not " + typeof pathString
+        'Parameter \'pathString\' must be a string, not ' + typeof pathString
     );
   }
   var allParts = win32SplitPath(pathString);
   if (!allParts || allParts.length !== 4) {
-    throw new TypeError("Invalid path '" + pathString + "'");
+    throw new TypeError('Invalid path \'' + pathString + '\'');
   }
   return {
     root: allParts[0],
     dir: allParts[0] + allParts[1].slice(0, -1),
     base: allParts[2],
     ext: allParts[3],
-    name: allParts[2].slice(0, allParts[2].length - allParts[3].length)
+    name: allParts[2].slice(0, allParts[2].length - allParts[3].length),
   };
 };
 
@@ -431,7 +431,7 @@ function posixSplitPath(filename) {
 // posix version
 posix.resolve = function() {
   var resolvedPath = '',
-      resolvedAbsolute = false;
+    resolvedAbsolute = false;
 
   for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
     var path = (i >= 0) ? arguments[i] : process.cwd();
@@ -461,7 +461,7 @@ posix.resolve = function() {
 // posix version
 posix.normalize = function(path) {
   var isAbsolute = posix.isAbsolute(path),
-      trailingSlash = path && path[path.length - 1] === '/';
+    trailingSlash = path && path[path.length - 1] === '/';
 
   // Normalize the path
   path = normalizeArray(path.split('/'), !isAbsolute).join('/');
@@ -537,8 +537,8 @@ posix._makeLong = function(path) {
 
 posix.dirname = function(path) {
   var result = posixSplitPath(path),
-      root = result[0],
-      dir = result[1];
+    root = result[0],
+    dir = result[1];
 
   if (!root && !dir) {
     // No dirname whatsoever
@@ -572,7 +572,7 @@ posix.extname = function(path) {
 posix.format = function(pathObject) {
   if (!util.isObject(pathObject)) {
     throw new TypeError(
-        "Parameter 'pathObject' must be an object, not " + typeof pathObject
+        'Parameter \'pathObject\' must be an object, not ' + typeof pathObject
     );
   }
 
@@ -580,7 +580,7 @@ posix.format = function(pathObject) {
 
   if (!util.isString(root)) {
     throw new TypeError(
-        "'pathObject.root' must be a string or undefined, not " +
+        '\'pathObject.root\' must be a string or undefined, not ' +
         typeof pathObject.root
     );
   }
@@ -594,12 +594,12 @@ posix.format = function(pathObject) {
 posix.parse = function(pathString) {
   if (!util.isString(pathString)) {
     throw new TypeError(
-        "Parameter 'pathString' must be a string, not " + typeof pathString
+        'Parameter \'pathString\' must be a string, not ' + typeof pathString
     );
   }
   var allParts = posixSplitPath(pathString);
   if (!allParts || allParts.length !== 4) {
-    throw new TypeError("Invalid path '" + pathString + "'");
+    throw new TypeError('Invalid path \'' + pathString + '\'');
   }
   allParts[1] = allParts[1] || '';
   allParts[2] = allParts[2] || '';
@@ -610,7 +610,7 @@ posix.parse = function(pathString) {
     dir: allParts[0] + allParts[1].slice(0, -1),
     base: allParts[2],
     ext: allParts[3],
-    name: allParts[2].slice(0, allParts[2].length - allParts[3].length)
+    name: allParts[2].slice(0, allParts[2].length - allParts[3].length),
   };
 };
 
