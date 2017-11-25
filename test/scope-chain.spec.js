@@ -12,11 +12,11 @@ import scpdVars, {
   defaultExprTypesDefine,
   EscapeChar,
   createEmplyFindVarResult,
-} from '../dist';
+} from '../src';
 
 import {
   SvScopeChain,
-} from '../dist/scope-chain';
+} from '../src/scope-chain';
 
 import {
   TestDataScopeNormal01,

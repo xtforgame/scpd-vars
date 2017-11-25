@@ -9,7 +9,7 @@ import {
   unescapeString,
   findContentInBracket,
   EscapeChar,
-} from '../dist/utils';
+} from '../src/utils';
 
 const expect = chai.expect;
 const assert = chai.assert;

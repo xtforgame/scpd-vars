@@ -5,7 +5,7 @@ import chai from 'chai';
 import path from 'path';
 import {
   LinkedList,
-} from '../dist/linked-list';
+} from '../src/linked-list';
 
 
 const expect = chai.expect;

@@ -15,7 +15,7 @@ import scpdVars, {
   SvTemplate,
   defaultExprTypesDefine,
   SvScopeChain,
-} from '../dist';
+} from '../src';
 
 const expect = chai.expect;
 const assert = chai.assert;

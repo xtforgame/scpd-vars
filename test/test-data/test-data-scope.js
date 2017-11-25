@@ -104,3 +104,19 @@ export const TestDataScopePaths01 = {
   ppath: '@ppath:${srcPath}',
   wpath: '@wpath:${srcPath}',
 };
+
+export const TestDataScopeFunctionDefine01 = {
+  fn01: {
+    exprType: '@fndef',
+    exprBody: {
+      fndef: '@eexpr:${srcPath}',
+    },
+  },
+  callf01: {
+    exprType: '@callf',
+    exprBody: {
+      fndef: '@getfn:${fn01}',
+    },
+  },
+  srcPath: 'xxx',
+};

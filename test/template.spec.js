@@ -7,7 +7,7 @@ import scpdVars, {
   SvTemplate,
   defaultExprTypesDefine,
   createEmplyFindVarResult,
-} from '../dist';
+} from '../src';
 
 import {
   TestDataScopeNormal01,
@@ -21,11 +21,12 @@ import {
   TestDataScopePartA02,
   TestDataScopePartB02,
   TestDataScopePaths01,
+  TestDataScopeFunctionDefine01,
 } from './test-data/test-data-scope';
 
 import {
   SvScopeChain,
-} from '../dist/scope-chain';
+} from '../src/scope-chain';
 
 const expect = chai.expect;
 const assert = chai.assert;
@@ -255,7 +256,7 @@ describe('Template test', () => {
           done();
         });
 
-        it('Should be able to eval \'@*path\' expressions (cases)', (done) => {
+        it('Should be able to eval \'@*path\' expressions', (done) => {
           const scope = new SvScope(TestDataScopePaths01);
           scope.evalVars();
 
@@ -267,6 +268,18 @@ describe('Template test', () => {
           expect(opath, `opath is ${opath}`).to.equal(path.normalize(srcPath));
           expect(ppath, `ppath is ${ppath}`).to.equal('/a/b/e/f');
           expect(wpath, `wpath is ${wpath}`).to.equal('\\a\\b\\e\\f');
+          done();
+        });
+
+        it('Should be able to eval \'@fndef\' expressions', (done) => {
+          const scope = new SvScope(TestDataScopeFunctionDefine01);
+          scope.evalVars();
+
+          const fn01 = scope.evalVar('fn01', new Set());
+          const callf = scope.evalVar('callf01', new Set());
+
+          expect(fn01.fndef, `fn01.fndef is ${fn01.fndef}`).to.equal('@eexpr:${srcPath}');
+          expect(callf, `callf01 is ${callf}`).to.equal('xxx');
           done();
         });
 
