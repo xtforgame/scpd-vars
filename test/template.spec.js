@@ -278,8 +278,8 @@ describe('Template test', () => {
           const fn01 = scope.evalVar('fn01', new Set());
           const callf = scope.evalVar('callf01', new Set());
 
-          expect(fn01.fndef, `fn01.fndef is ${fn01.fndef}`).to.equal('@eexpr:${srcPath}');
-          expect(callf, `callf01 is ${callf}`).to.equal('xxx');
+          expect(fn01.define, `fn01.define is ${fn01.define}`).to.equal('@eexpr:${srcPath}${arg1}${arg2}');
+          expect(callf, `callf01 is ${callf}`).to.equal('xxxxxxxxx');
           done();
         });
 

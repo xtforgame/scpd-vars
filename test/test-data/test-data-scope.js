@@ -109,13 +109,21 @@ export const TestDataScopeFunctionDefine01 = {
   fn01: {
     exprType: '@fndef',
     exprBody: {
-      fndef: '@eexpr:${srcPath}',
+      define: '@eexpr:${srcPath}${arg1}${arg2}',
+      args: [
+        ['arg1', '15'],
+        'arg2',
+      ],
     },
   },
   callf01: {
     exprType: '@callf',
     exprBody: {
-      fndef: '@getfn:${fn01}',
+      function: 'fn01',
+      args: ['@eexpr:${srcPath}'],
+      kvPairs: {
+        arg2: '@eexpr:${srcPath}',
+      },
     },
   },
   srcPath: 'xxx',

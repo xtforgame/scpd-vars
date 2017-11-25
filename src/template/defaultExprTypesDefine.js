@@ -3,6 +3,13 @@ import {
   SvVariable,
 } from '../non-generics';
 
+class FuncHelper
+{
+  static getCallInfo(exprObj){
+    return exprObj.exprInfo.rawData.exprBody;
+  }
+}
+
 const defaultExprTypesDefine = {
   '@eexpr': {},
   '@nexpr': {
@@ -11,6 +18,16 @@ const defaultExprTypesDefine = {
   '@fndef': {
     tokenize: (exprObj, ExpressionClass) => [exprObj.exprInfo.rawData],
     eval: (exprObj, evalingSet, ExpressionClass) => {
+      let exprBody = exprObj.exprInfo.rawData.exprBody;
+      exprBody.args = exprBody.args || [];
+      exprBody.argMap = {};
+      exprBody.args = exprBody.args.map((arg, i) => {
+        if (!Array.isArray(arg)) {
+          arg = [arg];
+        }
+        exprBody.argMap[arg[0]] = i;
+        return arg;
+      });
       return exprObj.exprInfo.rawData.exprBody;
     },
   },
@@ -28,14 +45,46 @@ const defaultExprTypesDefine = {
   '@callf': {
     tokenize: (exprObj, ExpressionClass) => [exprObj.exprInfo.rawData],
     eval: (exprObj, evalingSet, ExpressionClass) => {
-      const exprBody = exprObj.exprInfo.rawData.exprBody;
-      const funcDef = ExpressionClass.parseAndEval(exprObj.scope, '@funcDef', exprBody.fndef, evalingSet);
-      const callFunc = ExpressionClass.parseAndEval(exprObj.scope, '@callFunc', funcDef.fndef, evalingSet);
-      const xxcallFunc = ExpressionClass.parse(exprObj.scope, '@callFunc', funcDef.fndef);
-      console.log('xxcallFunc._exprInfo.tokens[0]._name :', xxcallFunc._exprInfo.tokens[0]._name);
-      console.log('xxcallFunc._exprInfo.tokens[0].eval(evalingSet) :', xxcallFunc._exprInfo.tokens[0].eval(evalingSet));
-      console.log('funcDef, callFunc :', funcDef, callFunc);
-      return callFunc;
+      const callInfo = FuncHelper.getCallInfo(exprObj);
+      callInfo.args = callInfo.args || [];
+      callInfo.kvPairs = callInfo.kvPairs || {};
+      const funcDef = ExpressionClass.parseAndEval(exprObj.scope, '@funcDef', `@getfn:\${${callInfo.function}}`, evalingSet);
+      const funcExpr = ExpressionClass.parse(exprObj.scope, '@funcExpr', funcDef.define);
+      {
+        // parse arg values
+        let args = {};
+        callInfo.args.forEach((arg, i) => {
+          const argDef = funcDef.args[i];
+          if (argDef) {
+            args[argDef[0]] = ExpressionClass.parseAndEval(exprObj.scope, '@arg', arg, evalingSet);
+          }
+        });
+        Object.keys(callInfo.kvPairs).forEach((key) => {
+          const argDefIndex = funcDef.argMap[key];
+          if (argDefIndex != null) {
+            args[key] = ExpressionClass.parseAndEval(exprObj.scope, '@arg', callInfo.kvPairs[key], evalingSet);
+          }
+        });
+        funcExpr._exprInfo.tokens = funcExpr._exprInfo.tokens.map((part) => {
+          // replace tokens
+          if (part instanceof SvVariable) {
+            const value = args[part._name];
+            if (value !== undefined) {
+              return value;
+            }
+            return part;
+          }
+          return part;
+        });
+        console.log('args :', args);
+        console.log('funcDef.args :', funcDef.args);
+        console.log('funcDef.argMap :', funcDef.argMap);
+        console.log('callInfo.args :', callInfo.args);
+        console.log('funcExpr._exprInfo.tokens[0] :', funcExpr._exprInfo.tokens[1]);
+      }
+
+      const result = funcExpr.eval(evalingSet);
+      return result;
     },
   },
   '@dexpr': {
