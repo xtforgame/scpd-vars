@@ -109,7 +109,7 @@ export const TestDataScopeFunctionDefine01 = {
   fn01: {
     exprType: '@fndef',
     exprBody: {
-      define: '@eexpr:${srcPath}${arg1}${arg2}',
+      define: '@eexpr:${srcPath}${arg2}${arg1}',
       args: [
         ['arg1', '15'],
         'arg2',
@@ -128,3 +128,38 @@ export const TestDataScopeFunctionDefine01 = {
   },
   srcPath: 'xxx',
 };
+
+export const TestDataScopeFunctionDefine02 = Object.assign({}, TestDataScopeFunctionDefine01, {
+  callf01: {
+    exprType: '@callf',
+    exprBody: {
+      function: 'fn01',
+      kvPairs: {
+        arg2: '@eexpr:${srcPath}',
+      },
+    },
+  },
+});
+
+export const TestDataScopeFunctionDefine03 = Object.assign({}, TestDataScopeFunctionDefine01, {
+  callf01: {
+    exprType: '@callf',
+    exprBody: {
+      function: 'fn01',
+      args: ['@eexpr:${srcPath}'],
+      kvPairs: {
+        arg1: 'pp',
+        arg2: '@eexpr:${srcPath}',
+      },
+    },
+  },
+});
+
+export const TestDataScopeFunctionDefine04 = Object.assign({}, TestDataScopeFunctionDefine01, {
+  callf01: {
+    exprType: '@callf',
+    exprBody: {
+      function: 'fn01',
+    },
+  },
+});

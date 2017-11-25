@@ -52,7 +52,7 @@ const defaultExprTypesDefine = {
       const funcExpr = ExpressionClass.parse(exprObj.scope, '@funcExpr', funcDef.define);
       {
         // parse arg values
-        let args = {};
+        const args = {};
         callInfo.args.forEach((arg, i) => {
           const argDef = funcDef.args[i];
           if (argDef) {
@@ -65,6 +65,11 @@ const defaultExprTypesDefine = {
             args[key] = ExpressionClass.parseAndEval(exprObj.scope, '@arg', callInfo.kvPairs[key], evalingSet);
           }
         });
+        funcDef.args.forEach((argDef) => {
+          if (args[argDef[0]] == null && argDef[1] == null) {
+            throw new Error(`Argument missing :${argDef[0]}`);
+          }
+        });
         funcExpr._exprInfo.tokens = funcExpr._exprInfo.tokens.map((part) => {
           // replace tokens
           if (part instanceof SvVariable) {
@@ -72,15 +77,18 @@ const defaultExprTypesDefine = {
             if (value !== undefined) {
               return value;
             }
+
+            const argDefIndex = funcDef.argMap[part._name];
+            if (argDefIndex != null) {
+              const defaultValue = funcDef.args[argDefIndex][1];
+              if (defaultValue) {
+                return ExpressionClass.parseAndEval(exprObj.scope, '@arg', defaultValue, evalingSet);
+              }
+            }
             return part;
           }
           return part;
         });
-        console.log('args :', args);
-        console.log('funcDef.args :', funcDef.args);
-        console.log('funcDef.argMap :', funcDef.argMap);
-        console.log('callInfo.args :', callInfo.args);
-        console.log('funcExpr._exprInfo.tokens[0] :', funcExpr._exprInfo.tokens[1]);
       }
 
       const result = funcExpr.eval(evalingSet);

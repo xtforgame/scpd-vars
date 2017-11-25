@@ -21,12 +21,13 @@ import {
   TestDataScopePartA02,
   TestDataScopePartB02,
   TestDataScopePaths01,
-  TestDataScopeFunctionDefine01,
 } from './test-data/test-data-scope';
 
 import {
   SvScopeChain,
 } from '../src/scope-chain';
+
+import createFuncExprTests from './template/createFuncExprTests';
 
 const expect = chai.expect;
 const assert = chai.assert;
@@ -271,17 +272,7 @@ describe('Template test', () => {
           done();
         });
 
-        it('Should be able to eval \'@fndef\' expressions', (done) => {
-          const scope = new SvScope(TestDataScopeFunctionDefine01);
-          scope.evalVars();
-
-          const fn01 = scope.evalVar('fn01', new Set());
-          const callf = scope.evalVar('callf01', new Set());
-
-          expect(fn01.define, `fn01.define is ${fn01.define}`).to.equal('@eexpr:${srcPath}${arg1}${arg2}');
-          expect(callf, `callf01 is ${callf}`).to.equal('xxxxxxxxx');
-          done();
-        });
+        createFuncExprTests(it, SvScope);
 
         it('Should be able to eval vars while creating', (done) => {
           const scope = new SvScope(TestDataScopeNormal01,
