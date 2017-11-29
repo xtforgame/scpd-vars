@@ -10,7 +10,9 @@ function normalizeArray(parts, allowAboveRoot) {
   for (var i = 0; i < parts.length; i++) {
     var p = parts[i];
 
-    if (!p || p === '.') continue;
+    if (!p || p === '.') {
+      continue;
+    }
 
     if (p === '..') {
       if (res.length && res[res.length - 1] !== '..') {
@@ -30,41 +32,50 @@ function trimArray(arr) {
   var lastIndex = arr.length - 1;
   var start = 0;
   for (; start <= lastIndex; start++) {
-    if (arr[start]) break;
+    if (arr[start]) {
+      break;
+    }
   }
 
   var end = lastIndex;
   for (; end >= 0; end--) {
-    if (arr[end]) break;
+    if (arr[end]) {
+      break;
+    }
   }
 
-  if (start === 0 && end === lastIndex) return arr;
-  if (start > end) return [];
+  if (start === 0 && end === lastIndex) {
+    return arr;
+  }
+  if (start > end) {
+    return [];
+  }
   return arr.slice(start, end + 1);
 }
 
-var splitDeviceRe = /^([a-zA-Z]:|[\\\/]{2}[^\\\/]+[\\\/]+[^\\\/]+)?([\\\/])?([\s\S]*?)$/;
+var splitDeviceRe = /^([a-zA-Z]:|[\\/]{2}[^\\/]+[\\/]+[^\\/]+)?([\\/])?([\s\S]*?)$/;
 
-var splitTailRe = /^([\s\S]*?)((?:\.{1,2}|[^\\\/]+?|)(\.[^.\/\\]*|))(?:[\\\/]*)$/;
+var splitTailRe = /^([\s\S]*?)((?:\.{1,2}|[^\\/]+?|)(\.[^./\\]*|))(?:[\\/]*)$/;
 
 var win32 = {};
 
 function win32SplitPath(filename) {
-  var result = splitDeviceRe.exec(filename),
-      device = (result[1] || '') + (result[2] || ''),
-      tail = result[3] || '';
+  var result = splitDeviceRe.exec(filename);
+  var device = (result[1] || '') + (result[2] || '');
+  var tail = result[3] || '';
 
-  var result2 = splitTailRe.exec(tail),
-      dir = result2[1],
-      basename = result2[2],
-      ext = result2[3];
+  var result2 = splitTailRe.exec(tail);
+  var dir = result2[1];
+  var basename = result2[2];
+  var ext = result2[3];
   return [device, dir, basename, ext];
 }
 
 function win32StatPath(path) {
-  var result = splitDeviceRe.exec(path),
-      device = result[1] || '',
-      isUnc = !!device && device[1] !== ':';
+  var result = splitDeviceRe.exec(path);
+  var device = result[1] || '';
+  var isUnc = !!device && device[1] !== ':';
+
   return {
     device: device,
     isUnc: isUnc,
@@ -74,18 +85,18 @@ function win32StatPath(path) {
 }
 
 function normalizeUNCRoot(device) {
-  return '\\\\' + device.replace(/^[\\\/]+/, '').replace(/[\\\/]+/g, '\\');
+  return '\\\\' + device.replace(/^[\\/]+/, '').replace(/[\\/]+/g, '\\');
 }
 
 win32.resolve = function () {
-  var resolvedDevice = '',
-      resolvedTail = '',
-      resolvedAbsolute = false;
+  var resolvedDevice = '';
+  var resolvedTail = '';
+  var resolvedAbsolute = false;
 
   for (var i = arguments.length - 1; i >= -1; i--) {
-    var path;
+    var path = void 0;
     if (i >= 0) {
-      path = arguments[i];
+      path = arguments.length <= i ? undefined : arguments[i];
     } else if (!resolvedDevice) {
       path = process.cwd();
     } else {
@@ -102,11 +113,11 @@ win32.resolve = function () {
       continue;
     }
 
-    var result = win32StatPath(path),
-        device = result.device,
-        isUnc = result.isUnc,
-        isAbsolute = result.isAbsolute,
-        tail = result.tail;
+    var result = win32StatPath(path);
+    var device = result.device;
+    var _isUnc = result.isUnc;
+    var isAbsolute = result.isAbsolute;
+    var tail = result.tail;
 
     if (device && resolvedDevice && device.toLowerCase() !== resolvedDevice.toLowerCase()) {
       continue;
@@ -209,7 +220,7 @@ win32.relative = function (from, to) {
   }
 
   var outputParts = [];
-  for (var i = samePartsLength; i < lowerFromParts.length; i++) {
+  for (var _i = samePartsLength; _i < lowerFromParts.length; _i++) {
     outputParts.push('..');
   }
 
@@ -219,7 +230,9 @@ win32.relative = function (from, to) {
 };
 
 win32._makeLong = function (path) {
-  if (!util.isString(path)) return path;
+  if (!util.isString(path)) {
+    return path;
+  }
 
   if (!path) {
     return '';
@@ -391,7 +404,7 @@ posix.relative = function (from, to) {
   }
 
   var outputParts = [];
-  for (var i = samePartsLength; i < fromParts.length; i++) {
+  for (var _i2 = samePartsLength; _i2 < fromParts.length; _i2++) {
     outputParts.push('..');
   }
 
@@ -473,7 +486,11 @@ posix.parse = function (pathString) {
 posix.sep = '/';
 posix.delimiter = ':';
 
-if (isWindows) module.exports = win32;else module.exports = posix;
+if (isWindows) {
+  module.exports = win32;
+} else {
+    module.exports = posix;
+  }
 
 module.exports.posix = posix;
 module.exports.win32 = win32;

@@ -8,6 +8,22 @@ class FuncHelper
   static getCallInfo(exprObj){
     return exprObj.exprInfo.rawData.exprBody;
   }
+
+  static getNormalizedArgInfo(funcDefExprBody){
+    let args = funcDefExprBody.args || [];
+    let argMap = {};
+    args = args.map((arg, i) => {
+      let normalizeArg = null;
+      if (!Array.isArray(arg)) {
+        normalizeArg = [arg];
+      }else{
+        normalizeArg = [...arg];
+      }
+      argMap[normalizeArg[0]] = i;
+      return normalizeArg;
+    });
+    return {args, argMap};
+  }
 }
 
 const defaultExprTypesDefine = {
@@ -18,16 +34,16 @@ const defaultExprTypesDefine = {
   '@fndef': {
     tokenize: (exprObj, ExpressionClass) => [exprObj.exprInfo.rawData],
     eval: (exprObj, evalingSet, ExpressionClass) => {
-      let exprBody = exprObj.exprInfo.rawData.exprBody;
-      exprBody.args = exprBody.args || [];
-      exprBody.argMap = {};
-      exprBody.args = exprBody.args.map((arg, i) => {
-        if (!Array.isArray(arg)) {
-          arg = [arg];
-        }
-        exprBody.argMap[arg[0]] = i;
-        return arg;
-      });
+      // let exprBody = exprObj.exprInfo.rawData.exprBody;
+      // exprBody.args = exprBody.args || [];
+      // exprBody.argMap = {};
+      // exprBody.args = exprBody.args.map((arg, i) => {
+      //   if (!Array.isArray(arg)) {
+      //     arg = [arg];
+      //   }
+      //   exprBody.argMap[arg[0]] = i;
+      //   return arg;
+      // });
       return exprObj.exprInfo.rawData.exprBody;
     },
   },
@@ -52,35 +68,36 @@ const defaultExprTypesDefine = {
       const funcExpr = ExpressionClass.parse(exprObj.scope, '@funcExpr', funcDef.define);
       {
         // parse arg values
-        const args = {};
+        const finalArgMap = {};
+        const {args: defArgs, argMap: defArgMap} = FuncHelper.getNormalizedArgInfo(funcDef);
         callInfo.args.forEach((arg, i) => {
-          const argDef = funcDef.args[i];
+          const argDef = defArgs[i];
           if (argDef) {
-            args[argDef[0]] = ExpressionClass.parseAndEval(exprObj.scope, '@arg', arg, evalingSet);
+            finalArgMap[argDef[0]] = ExpressionClass.parseAndEval(exprObj.scope, '@arg', arg, evalingSet);
           }
         });
         Object.keys(callInfo.kvPairs).forEach((key) => {
-          const argDefIndex = funcDef.argMap[key];
+          const argDefIndex = defArgMap[key];
           if (argDefIndex != null) {
-            args[key] = ExpressionClass.parseAndEval(exprObj.scope, '@arg', callInfo.kvPairs[key], evalingSet);
+            finalArgMap[key] = ExpressionClass.parseAndEval(exprObj.scope, '@arg', callInfo.kvPairs[key], evalingSet);
           }
         });
-        funcDef.args.forEach((argDef) => {
-          if (args[argDef[0]] == null && argDef[1] == null) {
+        defArgs.forEach((argDef) => {
+          if (finalArgMap[argDef[0]] == null && argDef[1] == null) {
             throw new Error(`Argument missing :${argDef[0]}`);
           }
         });
         funcExpr._exprInfo.tokens = funcExpr._exprInfo.tokens.map((part) => {
           // replace tokens
           if (part instanceof SvVariable) {
-            const value = args[part._name];
+            const value = finalArgMap[part._name];
             if (value !== undefined) {
               return value;
             }
 
-            const argDefIndex = funcDef.argMap[part._name];
+            const argDefIndex = defArgMap[part._name];
             if (argDefIndex != null) {
-              const defaultValue = funcDef.args[argDefIndex][1];
+              const defaultValue = defArgs[argDefIndex][1];
               if (defaultValue) {
                 return ExpressionClass.parseAndEval(exprObj.scope, '@arg', defaultValue, evalingSet);
               }
