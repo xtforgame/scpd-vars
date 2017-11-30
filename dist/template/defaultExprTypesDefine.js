@@ -24,9 +24,61 @@ var FuncHelper = function () {
   }
 
   _createClass(FuncHelper, null, [{
-    key: 'getCallInfo',
-    value: function getCallInfo(exprObj) {
-      return exprObj.exprInfo.rawData.exprBody;
+    key: 'getSimpleFormCallInfo',
+    value: function getSimpleFormCallInfo(tokens, evalingSet) {
+      var _function = '';
+      var args = [];
+      var kvPairs = {};
+      var getherFunctionName = function getherFunctionName(strPart) {
+        _function += strPart;
+      };
+
+      var getherFunction = getherFunctionName;
+      tokens.forEach(function (part, i) {
+        if (part instanceof _nonGenerics.SvVariable) {
+          if (part._type === _nonGenerics.SvVariable.Empty) {
+            var index = args.length;
+            getherFunction = function getherFunction(strPart) {
+              args[index] += strPart;
+            };
+            return args.push('');
+          } else if (part._name[0] === '@') {
+            var key = part._name.substr(1);
+            getherFunction = function getherFunction(strPart) {
+              kvPairs[key] += strPart;
+            };
+            return kvPairs[key] = '';
+          }
+          return getherFunction(part.eval(evalingSet));
+        }
+        return getherFunction(part);
+      });
+      getherFunction('');
+
+      if (!_function) {
+        throw new Error('The simple form of @callf should at least provide a function name as the first arg.');
+      }
+
+      return {
+        function: _function,
+        args: args,
+        kvPairs: kvPairs
+      };
+    }
+  }, {
+    key: 'getNormalizedCallInfo',
+    value: function getNormalizedCallInfo(exprObj, evalingSet) {
+      var tokens = exprObj.exprInfo.tokens;
+      if (!tokens || tokens.length === 0) {
+        var exprBody = exprObj.exprInfo.rawData.exprBody;
+        var callInfo = {
+          function: exprBody.function,
+          args: exprBody.args || [],
+          kvPairs: exprBody.kvPairs || {}
+        };
+        return callInfo;
+      }
+      return FuncHelper.getSimpleFormCallInfo(tokens, evalingSet);
     }
   }, {
     key: 'getNormalizedArgInfo',
@@ -78,12 +130,13 @@ var defaultExprTypesDefine = {
   },
   '@callf': {
     tokenize: function tokenize(exprObj, ExpressionClass) {
-      return [exprObj.exprInfo.rawData];
+      if (typeof exprObj.exprInfo.rawData === 'string') {
+        return ExpressionClass.stringTokenizer(exprObj);
+      }
+      return [];
     },
     eval: function _eval(exprObj, evalingSet, ExpressionClass) {
-      var callInfo = FuncHelper.getCallInfo(exprObj);
-      callInfo.args = callInfo.args || [];
-      callInfo.kvPairs = callInfo.kvPairs || {};
+      var callInfo = FuncHelper.getNormalizedCallInfo(exprObj, evalingSet);
       var funcDef = ExpressionClass.parseAndEval(exprObj.scope, '@funcDef', '@getfn:${' + callInfo.function + '}', evalingSet);
       var funcExpr = ExpressionClass.parse(exprObj.scope, '@funcExpr', funcDef.define);
       {

@@ -81,7 +81,7 @@ function createExpressionClass(config) {
         var currentPos = 0;
 
         while (result) {
-          if (!result[2]) {
+          if (result[2] == null) {
             throw Error('Invalid string :' + exprInfo.exprBody);
           }
           if (result[0] !== currentPos) {

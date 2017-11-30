@@ -3,26 +3,70 @@ import {
   SvVariable,
 } from '../non-generics';
 
-class FuncHelper
-{
-  static getCallInfo(exprObj){
-    return exprObj.exprInfo.rawData.exprBody;
+class FuncHelper {
+  static getSimpleFormCallInfo(tokens, evalingSet) {
+    let _function = '';
+    const args = [];
+    const kvPairs = {};
+    const getherFunctionName = (strPart) => { _function += strPart; };
+
+    let getherFunction = getherFunctionName;
+    tokens.forEach((part, i) => {
+      if (part instanceof SvVariable) {
+        if (part._type === SvVariable.Empty) {
+          const index = args.length;
+          getherFunction = (strPart) => { args[index] += strPart; };
+          return args.push('');
+        } else if (part._name[0] === '@') {
+          const key = part._name.substr(1);
+          getherFunction = (strPart) => { kvPairs[key] += strPart; };
+          return (kvPairs[key] = '');
+        }
+        return getherFunction(part.eval(evalingSet));
+      }
+      return getherFunction(part);
+    });
+    getherFunction('');
+
+    if (!_function) {
+      throw new Error('The simple form of @callf should at least provide a function name as the first arg.');
+    }
+
+    return {
+      function: _function,
+      args,
+      kvPairs,
+    };
   }
 
-  static getNormalizedArgInfo(funcDefExprBody){
+  static getNormalizedCallInfo(exprObj, evalingSet) {
+    const tokens = exprObj.exprInfo.tokens;
+    if (!tokens || tokens.length === 0) {
+      const exprBody = exprObj.exprInfo.rawData.exprBody;
+      const callInfo = {
+        function: exprBody.function,
+        args: exprBody.args || [],
+        kvPairs: exprBody.kvPairs || {},
+      };
+      return callInfo;
+    }
+    return FuncHelper.getSimpleFormCallInfo(tokens, evalingSet);
+  }
+
+  static getNormalizedArgInfo(funcDefExprBody) {
     let args = funcDefExprBody.args || [];
-    let argMap = {};
+    const argMap = {};
     args = args.map((arg, i) => {
       let normalizeArg = null;
       if (!Array.isArray(arg)) {
         normalizeArg = [arg];
-      }else{
+      } else {
         normalizeArg = [...arg];
       }
       argMap[normalizeArg[0]] = i;
       return normalizeArg;
     });
-    return {args, argMap};
+    return { args, argMap };
   }
 }
 
@@ -33,7 +77,7 @@ const defaultExprTypesDefine = {
   },
   '@fndef': {
     tokenize: (exprObj, ExpressionClass) => [exprObj.exprInfo.rawData],
-    eval: (exprObj, evalingSet, ExpressionClass) => {
+    eval: (exprObj, evalingSet, ExpressionClass) =>
       // let exprBody = exprObj.exprInfo.rawData.exprBody;
       // exprBody.args = exprBody.args || [];
       // exprBody.argMap = {};
@@ -44,8 +88,7 @@ const defaultExprTypesDefine = {
       //   exprBody.argMap[arg[0]] = i;
       //   return arg;
       // });
-      return exprObj.exprInfo.rawData.exprBody;
-    },
+       exprObj.exprInfo.rawData.exprBody,
   },
   '@getfn': {
     eval: (exprObj, evalingSet, ExpressionClass) => {
@@ -59,17 +102,20 @@ const defaultExprTypesDefine = {
     },
   },
   '@callf': {
-    tokenize: (exprObj, ExpressionClass) => [exprObj.exprInfo.rawData],
+    tokenize: (exprObj, ExpressionClass) => {
+      if (typeof exprObj.exprInfo.rawData === 'string') {
+        return ExpressionClass.stringTokenizer(exprObj);
+      }
+      return [];
+    },
     eval: (exprObj, evalingSet, ExpressionClass) => {
-      const callInfo = FuncHelper.getCallInfo(exprObj);
-      callInfo.args = callInfo.args || [];
-      callInfo.kvPairs = callInfo.kvPairs || {};
+      const callInfo = FuncHelper.getNormalizedCallInfo(exprObj, evalingSet);
       const funcDef = ExpressionClass.parseAndEval(exprObj.scope, '@funcDef', `@getfn:\${${callInfo.function}}`, evalingSet);
       const funcExpr = ExpressionClass.parse(exprObj.scope, '@funcExpr', funcDef.define);
       {
         // parse arg values
         const finalArgMap = {};
-        const {args: defArgs, argMap: defArgMap} = FuncHelper.getNormalizedArgInfo(funcDef);
+        const { args: defArgs, argMap: defArgMap } = FuncHelper.getNormalizedArgInfo(funcDef);
         callInfo.args.forEach((arg, i) => {
           const argDef = defArgs[i];
           if (argDef) {

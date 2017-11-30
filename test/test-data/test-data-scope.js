@@ -129,7 +129,7 @@ export const TestDataScopeFunctionDefine01 = {
   srcPath: 'xxx',
 };
 
-export const TestDataScopeFunctionDefine02 = Object.assign({}, TestDataScopeFunctionDefine01, {
+export const TestDataScopeFunctionCall01 = Object.assign({}, TestDataScopeFunctionDefine01, {
   callf01: {
     exprType: '@callf',
     exprBody: {
@@ -141,7 +141,7 @@ export const TestDataScopeFunctionDefine02 = Object.assign({}, TestDataScopeFunc
   },
 });
 
-export const TestDataScopeFunctionDefine03 = Object.assign({}, TestDataScopeFunctionDefine01, {
+export const TestDataScopeFunctionCall02 = Object.assign({}, TestDataScopeFunctionDefine01, {
   callf01: {
     exprType: '@callf',
     exprBody: {
@@ -155,7 +155,7 @@ export const TestDataScopeFunctionDefine03 = Object.assign({}, TestDataScopeFunc
   },
 });
 
-export const TestDataScopeFunctionDefine04 = Object.assign({}, TestDataScopeFunctionDefine01, {
+export const TestDataScopeFunctionCall03 = Object.assign({}, TestDataScopeFunctionDefine01, {
   callf01: {
     exprType: '@callf',
     exprBody: {
@@ -163,3 +163,16 @@ export const TestDataScopeFunctionDefine04 = Object.assign({}, TestDataScopeFunc
     },
   },
 });
+
+export const TestDataScopeSimpleCall01 = Object.assign({}, TestDataScopeFunctionDefine01, {
+  callf01: "@callf:fn01${@arg2}${srcPath}",
+});
+
+export const TestDataScopeSimpleCall02 = Object.assign({}, TestDataScopeFunctionDefine01, {
+  callf01: "@callf:fn01${}${srcPath}${@arg1}pp${@arg2}${srcPath}",
+});
+
+export const TestDataScopeSimpleCall03 = Object.assign({}, TestDataScopeFunctionDefine01, {
+  callf01: "@callf:fn01",
+});
+
